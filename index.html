@@ -145,9 +145,18 @@
                 <section id="tab-inventory" class="space-y-6 hidden">
                     <div class="flex justify-between items-center">
                         <input type="text" id="search-inventory" placeholder="ស្វែងរកទំនិញ..." class="px-4 py-2.5 border rounded-lg text-base w-72" oninput="renderInventory()">
-                        <button onclick="openAddProductModal()" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
-                            <i class="fa-solid fa-plus"></i> បន្ថែមទំនិញថ្មី (Add Product)
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="document.getElementById('import-products-file').click()" class="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-products-file" accept=".csv" class="hidden" onchange="importProductsExcel(event)">
+                            <button onclick="exportProductsExcel()" class="bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                            <button onclick="openAddProductModal()" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> បន្ថែមទំនិញថ្មី (Add Product)
+                            </button>
+                        </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
                         <table class="w-full text-left border-collapse relative">
@@ -175,9 +184,18 @@
                 <section id="tab-customers" class="space-y-6 hidden">
                     <div class="flex justify-between items-center">
                         <input type="text" id="search-customer" placeholder="ស្វែងរកអតិថិជន..." class="px-4 py-2.5 border rounded-lg text-base w-72" oninput="renderCustomers()">
-                        <button onclick="openModal('customer-modal')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
-                            <i class="fa-solid fa-user-plus"></i> បន្ថែមអតិថិជនថ្មី (Add Customer)
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="document.getElementById('import-customers-file').click()" class="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-customers-file" accept=".csv" class="hidden" onchange="importCustomersExcel(event)">
+                            <button onclick="exportCustomersExcel()" class="bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                            <button onclick="openModal('customer-modal')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-user-plus"></i> បន្ថែមអតិថិជនថ្មី (Add Customer)
+                            </button>
+                        </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
                         <table class="w-full text-left border-collapse relative">
@@ -200,9 +218,18 @@
                 <section id="tab-suppliers" class="space-y-6 hidden">
                     <div class="flex justify-between items-center">
                         <input type="text" id="search-supplier" placeholder="ស្វែងរកអ្នកផ្គត់ផ្គង់..." class="px-4 py-2.5 border rounded-lg text-base w-72" oninput="renderSuppliers()">
-                        <button onclick="openModal('supplier-modal')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
-                            <i class="fa-solid fa-truck-field"></i> បន្ថែមអ្នកផ្គត់ផ្គង់ថ្មី (Add Supplier)
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="document.getElementById('import-suppliers-file').click()" class="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-suppliers-file" accept=".csv" class="hidden" onchange="importSuppliersExcel(event)">
+                            <button onclick="exportSuppliersExcel()" class="bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                            <button onclick="openModal('supplier-modal')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-truck-field"></i> បន្ថែមអ្នកផ្គត់ផ្គង់ថ្មី (Add Supplier)
+                            </button>
+                        </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
                         <table class="w-full text-left border-collapse relative">
@@ -1734,6 +1761,204 @@
             link.href = URL.createObjectURL(blob);
             link.download = "Inventory_Report.csv";
             link.click();
+        }
+
+        // ==========================================
+        // IMPORT EXCEL (CSV) FUNCTIONS
+        // ==========================================
+        function importProductsExcel(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    let text = evt.target.result;
+                    let lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                    if (lines.length <= 1) {
+                        alert('File គ្មានទិន្ន័យ ឬខុសទម្រង់!');
+                        return;
+                    }
+                    let newProducts = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        let row = parseCSVRow(lines[i]);
+                        if (row.length >= 6) {
+                            let code = row[0];
+                            let name = row[1];
+                            let category = row[2];
+                            let supplier = row[3] || '';
+                            let unit = row[4] || '';
+                            let opening = Number(row[5] || 0);
+                            let price = Number(row[9] || row[6] || 0);
+                            
+                            if (code && name) {
+                                newProducts.push({
+                                    code: code.trim(),
+                                    name: name.trim(),
+                                    category: category.trim(),
+                                    supplier: supplier.trim(),
+                                    unit: unit.trim(),
+                                    opening: isNaN(opening) ? 0 : opening,
+                                    price: isNaN(price) ? 0 : price
+                                });
+                            }
+                        }
+                    }
+                    if (newProducts.length > 0) {
+                        if (confirm(`រកឃើញទំនិញចំនួន ${newProducts.length} តើអ្នកចង់ Import ចូលទេ?`)) {
+                            products = newProducts;
+                            saveAppData();
+                            renderInventory();
+                            renderDashboard();
+                            alert('Import បញ្ជីទំនិញជោគជ័យ!');
+                        }
+                    } else {
+                        alert('មិនអាចអានទិន្ន័យពី File នេះបានទេ។');
+                    }
+                } catch (err) {
+                    alert('មានបញ្ហាពេលអាន File: ' + err.message);
+                }
+                e.target.value = '';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function importCustomersExcel(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    let text = evt.target.result;
+                    let lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                    if (lines.length <= 1) { alert('File គ្មានទិន្ន័យ!'); return; }
+                    let newCustomers = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        let row = parseCSVRow(lines[i]);
+                        if (row.length >= 5) {
+                            newCustomers.push({
+                                name: row[0].trim(),
+                                company: row[1] ? row[1].trim() : '',
+                                phone: row[2] ? row[2].trim() : '',
+                                email: row[3] ? row[3].trim() : '',
+                                address: row[4] ? row[4].trim() : ''
+                            });
+                        }
+                    }
+                    if (newCustomers.length > 0) {
+                        if (confirm(`រកឃើញអតិថិជនចំនួន ${newCustomers.length} តើអ្នកចង់ Import ចូលទេ?`)) {
+                            customers = newCustomers;
+                            saveAppData();
+                            renderCustomers();
+                            alert('Import បញ្ជីអតិថិជនជោគជ័យ!');
+                        }
+                    }
+                } catch (err) { alert('កំហុស: ' + err.message); }
+                e.target.value = '';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function importSuppliersExcel(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    let text = evt.target.result;
+                    let lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                    if (lines.length <= 1) { alert('File គ្មានទិន្ន័យ!'); return; }
+                    let newSuppliers = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        let row = parseCSVRow(lines[i]);
+                        if (row.length >= 5) {
+                            newSuppliers.push({
+                                name: row[0].trim(),
+                                company: row[1] ? row[1].trim() : '',
+                                phone: row[2] ? row[2].trim() : '',
+                                email: row[3] ? row[3].trim() : '',
+                                address: row[4] ? row[4].trim() : ''
+                            });
+                        }
+                    }
+                    if (newSuppliers.length > 0) {
+                        if (confirm(`រកឃើញអ្នកផ្គត់ផ្គង់ចំនួន ${newSuppliers.length} តើអ្នកចង់ Import ចូលទេ?`)) {
+                            suppliers = newSuppliers;
+                            saveAppData();
+                            renderSuppliers();
+                            alert('Import បញ្ជីអ្នកផ្គត់ផ្គង់ជោគជ័យ!');
+                        }
+                    }
+                } catch (err) { alert('កំហុស: ' + err.message); }
+                e.target.value = '';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function parseCSVRow(text) {
+            let result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') {
+                    if (inQuotes && text[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result.map(item => item.replace(/^"|"$/g, '').trim());
+        }
+
+        // ==========================================
+        // EXPORT EXCEL (CSV) FUNCTIONS
+        // ==========================================
+        function exportProductsExcel() {
+            if(!products || products.length === 0) { alert("គ្មានទិន្ន័យទំនិញសម្រាប់ Export ទេ!"); return; }
+            let csvContent = "\uFEFFកូដទំនិញ,ឈ្មោះទំនិញ,ប្រភេទ,អ្នកផ្គត់ផ្គង់,ខ្នាត,ស្តុកដើម,ចូល,ចេញ,ស្តុកចុងគ្រា,តម្លៃដើម ($)\n";
+            products.forEach(p => {
+                let t = getTotals(p.code);
+                let balance = Number(p.opening) + t.totalIn - t.totalOut;
+                csvContent += `"${p.code || ''}","${p.name || ''}","${p.category || ''}","${p.supplier || ''}","${p.unit || ''}",${p.opening},${t.totalIn},${t.totalOut},${balance},${p.price}\n`;
+            });
+            downloadCSV(csvContent, "Inventory_Products.csv");
+        }
+
+        function exportCustomersExcel() {
+            if(!customers || customers.length === 0) { alert("គ្មានទិន្ន័យអតិថិជនសម្រាប់ Export ទេ!"); return; }
+            let csvContent = "\uFEFFឈ្មោះអតិថិជន,ក្រុមហ៊ុន/បុរី,លេខទូរស័ព្ទ,អ៊ីមែល,អាសយដ្ឋាន\n";
+            customers.forEach(c => {
+                csvContent += `"${c.name || ''}","${c.company || ''}","${c.phone || ''}","${c.email || ''}","${c.address || ''}"\n`;
+            });
+            downloadCSV(csvContent, "Customers_List.csv");
+        }
+
+        function exportSuppliersExcel() {
+            if(!suppliers || suppliers.length === 0) { alert("គ្មានទិន្ន័យអ្នកផ្គត់ផ្គង់សម្រាប់ Export ទេ!"); return; }
+            let csvContent = "\uFEFFឈ្មោះអ្នកផ្គត់ផ្គង់,ក្រុមហ៊ុន,លេខទូរស័ព្ទ,អ៊ីមែល,អាសយដ្ឋាន\n";
+            suppliers.forEach(s => {
+                csvContent += `"${s.name || ''}","${s.company || ''}","${s.phone || ''}","${s.email || ''}","${s.address || ''}"\n`;
+            });
+            downloadCSV(csvContent, "Suppliers_List.csv");
+        }
+
+        function downloadCSV(csvContent, filename) {
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         checkAuth();
