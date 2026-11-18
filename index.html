@@ -346,7 +346,7 @@
                                 <option value="in">ស្តុកចូល (Stock In)</option>
                                 <option value="out">ស្តុកចេញ (Stock Out)</option>
                             </select>
-                            <input type="text" id="search-transactions" placeholder="ស្វែងរកក្នុងប្រតិបត្តិការ..." class="px-4 py-2.5 border rounded-lg text-base w-full md:w-36" oninput="renderTransactions()">
+                            <input type="text" id="search-transactions" placeholder="ស្វែងរកក្នុងប្រតិបត្តិការ..." class="px-4 py-2.5 border rounded-lg text-base w-full md:w-44" oninput="renderTransactions()">
 
                             <button onclick="document.getElementById('import-transactions-file').click()" class="bg-emerald-600 text-white px-3 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-1.5 whitespace-nowrap admin-only">
                                 <i class="fa-solid fa-file-excel"></i> Import Excel
@@ -739,7 +739,7 @@
 
     <!-- Datalist for Categories & Units -->
     <datalist id="category-list">
-        <option value="ដែក"><option value="ស៊ីម៉ង់ត៍"><option value="ឥដ្ឋ"><option value="ខ្សាច់"><option value="ថ្នាំលាប"><option value="បរិក្ខារធ្វើពិដាន"><option value="បរិក្ខារតបណ្តាញទឹក"><option value="បរិក្ខារតបណ្តាញអគ្គិសនី">
+        <option value="ដែក"><option value="ស៊ីម៉ង់ត៍"><option value="ឥដ្ឋ"><option value="ខ្សាច់"><option value="ថ្នាំលាប"><option value="បរិក្ខារតបណ្តាញអគ្គិសនី"><option value="បរិក្ខារតបណ្តាញទឹក"><option value="បរិក្ខារអេឡិកត្រូនិក"><option value="បរិក្ខារធ្វើពិដាន">
     </datalist>
     <datalist id="unit-list">
         <option value="រាយ"><option value="កញ្ចប់"><option value="គីឡូក្រាម"><option value="ដុំ"><option value="ម៉ែត្រ"><option value="ដើម"><option value="សន្លឹក"><option value="លីត្រ"><option value="ប្រអប់"><option value="បាវ"><option value="តោន"><option value="ការុង"><option value="សុង">
@@ -968,7 +968,11 @@
             if(tabId === 'inventory') renderInventory();
             if(tabId === 'customers') renderCustomers();
             if(tabId === 'suppliers') renderSuppliers();
-            if(tabId === 'stockin' || tabId === 'stockout') populateDropdowns();
+            if(tabId === 'stockin' || tabId === 'stockout') {
+                populateDropdowns();
+                updateStockInUnit();
+                updateStockOutUnit();
+            }
             if(tabId === 'transactions') renderTransactions();
             if(tabId === 'reports') renderReports();
             if(tabId === 'users') renderUsers();
@@ -1289,6 +1293,24 @@
             });
         }
 
+        function updateStockInUnit() {
+            let code = document.getElementById('in-item-code').value;
+            let p = products.find(x => x.code === code);
+            let label = document.getElementById('in-unit-label');
+            if(label) {
+                label.innerText = p && p.unit ? `(${p.unit})` : '';
+            }
+        }
+
+        function updateStockOutUnit() {
+            let code = document.getElementById('out-item-code').value;
+            let p = products.find(x => x.code === code);
+            let label = document.getElementById('out-unit-label');
+            if(label) {
+                label.innerText = p && p.unit ? `(${p.unit})` : '';
+            }
+        }
+
         function handleStockIn(e) {
             e.preventDefault();
             let newEntry = {
@@ -1301,6 +1323,7 @@
                 alert('បានបញ្ចូលស្តុកចូលដោយជោគជ័យ!');
                 e.target.reset();
                 document.getElementById('in-date').valueAsDate = new Date();
+                updateStockInUnit();
                 printSpecificTransaction('stockIn', docRef.id);
             });
         }
@@ -1329,11 +1352,11 @@
                 alert('បានកត់ត្រាស្តុកចេញដោយជោគជ័យ!');
                 e.target.reset();
                 document.getElementById('out-date').valueAsDate = new Date();
+                updateStockOutUnit();
                 printSpecificTransaction('stockOut', docRef.id);
             });
         }
 
-        // FUNCTION TO PRINT INDIVIDUAL TRANSACTION VOUCHER
         function printSpecificTransaction(col, id) {
             let item = (col === 'stockIn') ? stockIn.find(x => x.id === id) : stockOut.find(x => x.id === id);
             if(!item) return;
@@ -1409,16 +1432,36 @@
             tbody.innerHTML = '';
             let isAdmin = currentUser && currentUser.role === 'Admin';
 
+            let startDate = document.getElementById('trans-start-date').value;
+            let endDate = document.getElementById('trans-end-date').value;
+            let typeFilter = document.getElementById('filter-trans-type').value;
+            let search = document.getElementById('search-transactions').value.toLowerCase();
+
             let list = [
                 ...stockIn.map(i => ({ ...i, type: 'ចូល (Stock In)', typeKey: 'in', col: 'stockIn', badge: 'bg-emerald-100 text-emerald-700', targetName: '-' })),
                 ...stockOut.map(i => ({ ...i, type: 'ចេញ (Stock Out)', typeKey: 'out', col: 'stockOut', badge: 'bg-amber-100 text-amber-700', targetName: i.customer || '-' }))
-            ].sort((a,b) => new Date(b.date) - new Date(a.date));
+            ].filter(t => {
+                if (startDate && t.date < startDate) return false;
+                if (endDate && t.date > endDate) return false;
+                if (typeFilter && t.typeKey !== typeFilter) return false;
+
+                if (search) {
+                    let p = products.find(x => x.code === t.code);
+                    let itemName = p ? p.name.toLowerCase() : '';
+                    let code = t.code.toLowerCase();
+                    let party = t.targetName.toLowerCase();
+                    let note = (t.note || '').toLowerCase();
+                    if (!code.includes(search) && !itemName.includes(search) && !party.includes(search) && !note.includes(search)) {
+                        return false;
+                    }
+                }
+                return true;
+            }).sort((a,b) => new Date(b.date) - new Date(a.date));
 
             list.forEach(t => {
                 let p = products.find(x => x.code === t.code);
                 let itemName = p ? p.name : '';
 
-                // Added Print Button with Green Theme on each row
                 let actionBtns = `
                     <div class="flex items-center justify-center gap-3">
                         <button onclick="printSpecificTransaction('${t.col}', '${t.id}')" class="text-emerald-600 hover:text-emerald-800 text-lg" title="ព្រីនប័ណ្ណ"><i class="fa-solid fa-print"></i></button>
@@ -1463,8 +1506,42 @@
             let grandTotal = 0;
             let displayIndex = 1;
 
-            products.forEach((p) => {
-                let { totalIn, totalOut } = getTotals(p.code);
+            let startDate = document.getElementById('report-start-date').value;
+            let endDate = document.getElementById('report-end-date').value;
+            let typeFilter = document.getElementById('filter-report-type').value;
+            let search = document.getElementById('search-report').value.toLowerCase();
+
+            products.filter(p => {
+                if (search) {
+                    let name = (p.name || '').toLowerCase();
+                    let code = (p.code || '').toLowerCase();
+                    let cat = (p.category || '').toLowerCase();
+                    if (!name.includes(search) && !code.includes(search) && !cat.includes(search)) {
+                        return false;
+                    }
+                }
+                return true;
+            }).forEach((p) => {
+                let filteredIn = stockIn.filter(i => {
+                    if (i.code !== p.code) return false;
+                    if (startDate && i.date < startDate) return false;
+                    if (endDate && i.date > endDate) return false;
+                    return true;
+                });
+
+                let filteredOut = stockOut.filter(o => {
+                    if (o.code !== p.code) return false;
+                    if (startDate && o.date < startDate) return false;
+                    if (endDate && o.date > endDate) return false;
+                    return true;
+                });
+
+                let totalIn = filteredIn.reduce((sum, i) => sum + Number(i.qty), 0);
+                let totalOut = filteredOut.reduce((sum, o) => sum + Number(o.qty), 0);
+
+                if (typeFilter === 'in' && totalIn === 0) return;
+                if (typeFilter === 'out' && totalOut === 0) return;
+
                 let balance = Number(p.opening || 0) + totalIn - totalOut;
                 let totalValue = balance * Number(p.price || 0);
                 grandTotal += totalValue;
@@ -1525,7 +1602,8 @@
                 if(!select) return;
                 select.innerHTML = '';
                 products.forEach(p => {
-                    select.innerHTML += `<option value="${p.code}">${p.code} - ${p.name}</option>`;
+                    let unitText = p.unit ? ` [${p.unit}]` : '';
+                    select.innerHTML += `<option value="${p.code}">${p.code} - ${p.name}${unitText}</option>`;
                 });
             });
 
@@ -1704,8 +1782,6 @@
         function printSuppliersPDF() { window.print(); }
         function printTransactionsPDF() { window.print(); }
 
-        function updateStockInUnit() {}
-        function updateStockOutUnit() {}
         function openAddProductModal() { populateSupplierDropdowns(); openModal('product-modal'); }
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
