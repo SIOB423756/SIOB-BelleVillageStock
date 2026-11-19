@@ -1,0 +1,2351 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធគ្រប់គ្រងស្តុកទំនិញ v.01</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Kantumruy Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Firebase SDKs (Compat version for single HTML file) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; font-size: 16px; }
+        @media print {
+            html, body, #app-screen, .flex-1, main {
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+                display: block !important;
+                background: #ffffff !important;
+            }
+            aside, header, .no-print, .print-hide-col {
+                display: none !important;
+            }
+            main {
+                padding: 0 !important;
+            }
+            .max-h-\[70vh\], .max-h-\[60vh\], .overflow-y-auto, .overflow-x-auto {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 12px !important;
+            }
+            th, td {
+                border: 1px solid #cbd5e1 !important;
+                padding: 6px 8px !important;
+            }
+            thead {
+                display: table-header-group;
+            }
+            tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            .shadow-sm, .shadow-lg, .shadow-xl, .shadow-2xl {
+                box-shadow: none !important;
+            }
+            /* Voucher Modal Print Handling */
+            body.printing-voucher #app-screen {
+                display: none !important;
+            }
+            body.printing-voucher #voucher-modal {
+                position: static !important;
+                display: block !important;
+                background: #ffffff !important;
+                padding: 0 !important;
+            }
+            body.printing-voucher #voucher-modal > div {
+                max-width: 100% !important;
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+            }
+            #voucher-modal:not(.show-voucher-print) {
+                display: none !important;
+            }
+            .print-header-only {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 16px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #cbd5e1;
+            }
+        }
+        .print-header-only {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="flex items-center justify-center h-screen bg-slate-900">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center overflow-hidden mx-auto mb-3 border-2 border-amber-500 shadow-md bg-[#F5EBE0]">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><circle cx='100' cy='100' r='95' fill='%23F5EBE0' stroke='%23D4AF37' stroke-width='4'/><text x='100' y='75' font-family='serif' font-size='50' fill='%23D4AF37' text-anchor='middle' font-weight='bold'>B</text><text x='125' y='95' font-family='serif' font-size='30' fill='%23D4AF37' text-anchor='middle' font-style='italic'>V</text><text x='100' y='130' font-family='sans-serif' font-size='12' fill='%238C6D33' text-anchor='middle' font-weight='bold'>បុរី ប៊ែល វីឡាសន៍</text><text x='100' y='148' font-family='serif' font-size='11' fill='%238C6D33' text-anchor='middle'>Belle Village</text><line x1='60' y1='158' x2='140' y2='158' stroke='%23D4AF37' stroke-width='1.5'/><text x='100' y='173' font-family='sans-serif' font-size='9' fill='%238C6D33' text-anchor='middle' letter-spacing='2'>RESIDENCE</text></svg>" alt="Belle Village Logo" class="w-full h-full object-cover">
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">ប្រព័ន្ធគ្រប់គ្រងស្តុកទំនិញ v.01</h2>
+                <p class="text-base text-slate-500 mt-1">សូមចូលគណនីរបស់អ្នកដើម្បីបន្ត (Username ឬ Email)</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-base font-medium text-slate-700 mb-1">ឈ្មោះអ្នកប្រើប្រាស់ ឬ អ៊ីមែល (Username / Email)</label>
+                    <input type="text" id="login-user" placeholder="ឧ. admin, staff01 ឬ email" required class="w-full px-4 py-2.5 border rounded-xl text-base focus:outline-blue-500">
+                </div>
+                <div>
+                    <label class="block text-base font-medium text-slate-700 mb-1">ពាក្យសម្ងាត់ (Password)</label>
+                    <input type="password" id="login-pass" required class="w-full px-4 py-2.5 border rounded-xl text-base focus:outline-blue-500">
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" onclick="handleForgotPassword()" class="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                        ភ្លេចពាក្យសម្ងាត់? (Reset Password)
+                    </button>
+                </div>
+                <button type="submit" id="login-submit-btn" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium text-base hover:bg-blue-700 transition">ចូលប្រព័ន្ធ (Login)</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-screen" class="flex h-screen overflow-hidden hidden">
+        <!-- Sidebar -->
+        <aside class="w-96 bg-slate-900 text-white flex flex-col no-print flex-shrink-0">
+            <div class="p-4 text-xl font-bold tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <div class="w-11 h-11 rounded-full overflow-hidden border border-amber-400 flex-shrink-0 bg-[#F5EBE0] flex items-center justify-center">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><circle cx='100' cy='100' r='95' fill='%23F5EBE0' stroke='%23D4AF37' stroke-width='4'/><text x='100' y='75' font-family='serif' font-size='50' fill='%23D4AF37' text-anchor='middle' font-weight='bold'>B</text><text x='125' y='95' font-family='serif' font-size='30' fill='%23D4AF37' text-anchor='middle' font-style='italic'>V</text><text x='100' y='130' font-family='sans-serif' font-size='12' fill='%238C6D33' text-anchor='middle' font-weight='bold'>បុរី ប៊ែល វីឡាសន៍</text><text x='100' y='148' font-family='serif' font-size='11' fill='%238C6D33' text-anchor='middle'>Belle Village</text><line x1='60' y1='158' x2='140' y2='158' stroke='%23D4AF37' stroke-width='1.5'/><text x='100' y='173' font-family='sans-serif' font-size='9' fill='%238C6D33' text-anchor='middle' letter-spacing='2'>RESIDENCE</text></svg>" alt="Belle Village Logo" class="w-full h-full object-cover">
+                </div>
+                <div class="leading-tight">
+                    <span class="text-base block font-bold text-amber-300">បុរី ប៊ែល វីឡាសន៍</span>
+                    <span class="text-sm text-slate-300 font-normal">ប្រព័ន្ធគ្រប់គ្រងស្តុកទំនិញ v.01</span>
+                </div>
+            </div>
+            <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto text-base">
+                <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600 text-white transition whitespace-nowrap">
+                    <i class="fa-solid fa-chart-pie w-5 flex-shrink-0"></i> ផ្ទាំងដើម (Dashboard)
+                </a>
+                <a href="#" onclick="switchTab('inventory')" id="nav-inventory" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">
+                    <i class="fa-solid fa-box w-5 flex-shrink-0"></i> បញ្ជីទំនិញ (Inventory)
+                </a>
+                <a href="#" onclick="switchTab('customers')" id="nav-customers" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">
+                    <i class="fa-solid fa-address-book w-5 flex-shrink-0"></i> អតិថិជន (Customers)
+                </a>
+                <a href="#" onclick="switchTab('suppliers')" id="nav-suppliers" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">
+                    <i class="fa-solid fa-truck-field w-5 flex-shrink-0"></i> អ្នកផ្គត់ផ្គង់ (Suppliers)
+                </a>
+                <a href="#" onclick="switchTab('stockin')" id="nav-stockin" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">
+                    <i class="fa-solid fa-cart-arrow-down w-5 flex-shrink-0"></i> ស្តុកចូល (Stock In)
+                </a>
+                <a href="#" onclick="switchTab('stockout')" id="nav-stockout" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">
+                    <i class="fa-solid fa-truck-ramp-box w-5 flex-shrink-0"></i> ស្តុកចេញ (Stock Out)
+                </a>
+                <a href="#" onclick="switchTab('transactions')" id="nav-transactions" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">
+                    <i class="fa-solid fa-list-check w-5 flex-shrink-0"></i> ប្រវត្តិប្រតិបត្តិការ (Transactions)
+                </a>
+                <a href="#" onclick="switchTab('reports')" id="nav-reports" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">
+                    <i class="fa-solid fa-file-lines w-5 flex-shrink-0"></i> ផ្ទាំងរបាយការណ៍ (Reports)
+                </a>
+                <a href="#" onclick="switchTab('users')" id="nav-users" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 transition whitespace-nowrap admin-only">
+                    <i class="fa-solid fa-users w-5 flex-shrink-0"></i> គ្រប់គ្រងអ្នកប្រើប្រាស់ (User Management)
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 flex items-center justify-between">
+                <div>
+                    <p id="current-username" class="text-base font-bold text-white">Admin</p>
+                    <p id="current-role" class="text-sm text-blue-400">Admin Role</p>
+                </div>
+                <button onclick="handleLogout()" class="text-slate-400 hover:text-red-400 text-xl transition" title="ចាកចេញ">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 border-b no-print">
+                <h1 id="page-title" class="text-xl font-bold text-slate-800">ផ្ទាំងដើម (Dashboard)</h1>
+            </header>
+
+            <main class="p-6">
+                <!-- TAB 1: DASHBOARD -->
+                <section id="tab-dashboard" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-base text-slate-500 font-medium">មុខទំនិញសរុប</p>
+                                <h3 id="stat-total-items" class="text-3xl font-bold text-slate-800 mt-1">0</h3>
+                            </div>
+                            <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl"><i class="fa-solid fa-box"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-base text-slate-500 font-medium">ស្តុកចូលសរុប</p>
+                                <h3 id="stat-total-in" class="text-3xl font-bold text-emerald-600 mt-1">0</h3>
+                            </div>
+                            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl"><i class="fa-solid fa-arrow-down"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-base text-slate-500 font-medium">ស្តុកចេញសរុប</p>
+                                <h3 id="stat-total-out" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
+                            </div>
+                            <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-2xl"><i class="fa-solid fa-arrow-up"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-base text-slate-500 font-medium">តម្លៃស្តុកសរុប</p>
+                                <h3 id="stat-total-value" class="text-3xl font-bold text-indigo-600 mt-1">$0.00</h3>
+                            </div>
+                            <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-2xl"><i class="fa-solid fa-dollar-sign"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- STOCK MOVEMENT GRAPH / CHART -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-blue-600"></i> ក្រាហ្វិកសង្ខេបចលនាស្តុក (Stock Movement Chart)
+                        </h3>
+                        <div class="h-80 w-full">
+                            <canvas id="stockChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: INVENTORY -->
+                <section id="tab-inventory" class="space-y-6 hidden">
+                    <div class="flex justify-between items-center no-print">
+                        <input type="text" id="search-inventory" placeholder="ស្វែងរកទំនិញ..." class="px-4 py-2.5 border rounded-lg text-base w-72" oninput="renderInventory()">
+                        <div class="flex items-center gap-3">
+                            <button onclick="document.getElementById('import-products-file').click()" class="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-2 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-products-file" accept=".csv" class="hidden" onchange="importProductsExcel(event)">
+                            <button onclick="exportProductsExcel()" class="bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-2 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                            <button onclick="printSection('inventory')" class="bg-slate-800 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-slate-900 transition flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> Print PDF
+                            </button>
+                            <button onclick="openAddProductModal()" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> បន្ថែមទំនិញថ្មី (Add Product)
+                            </button>
+                        </div>
+                    </div>
+                    <div id="printable-inventory" class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
+                        <div class="print-header-only">
+                            <h2 class="text-xl font-bold text-slate-800">បញ្ជីទំនិញសរុប (Inventory List)</h2>
+                            <p class="text-sm text-slate-500">បុរី ប៊ែល វីឡាសន៍ — កាលបរិច្ឆេទ: <span class="print-today"></span></p>
+                        </div>
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="bg-slate-50 text-slate-600 text-sm uppercase sticky top-0 z-20 shadow-sm font-semibold">
+                                <tr>
+                                    <th class="p-4 bg-slate-50">កូដ (Code)</th>
+                                    <th class="p-4 bg-slate-50">ឈ្មោះទំនិញ (Item Name)</th>
+                                    <th class="p-4 bg-slate-50">ប្រភេទ (Category)</th>
+                                    <th class="p-4 bg-slate-50">ប្រភពផ្គត់ផ្គង់ (Supplier)</th>
+                                    <th class="p-4 bg-slate-50">ឯកតា (Unit)</th>
+                                    <th class="p-4 bg-slate-50 text-center">ស្តុកដើម (Opening)</th>
+                                    <th class="p-4 bg-slate-50 text-center">ចូល (In)</th>
+                                    <th class="p-4 bg-slate-50 text-center">ចេញ (Out)</th>
+                                    <th class="p-4 bg-slate-50 text-center font-bold">ស្តុកចុងគ្រា (Balance)</th>
+                                    <th class="p-4 bg-slate-50 text-center">តម្លៃដើម ($) (Price)</th>
+                                    <th class="p-4 bg-slate-50 text-center print-hide-col">សកម្មភាព (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table-body" class="divide-y text-base"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- TAB: CUSTOMERS -->
+                <section id="tab-customers" class="space-y-6 hidden">
+                    <div class="flex justify-between items-center no-print">
+                        <input type="text" id="search-customer" placeholder="ស្វែងរកអតិថិជន..." class="px-4 py-2.5 border rounded-lg text-base w-72" oninput="renderCustomers()">
+                        <div class="flex items-center gap-3">
+                            <button onclick="document.getElementById('import-customers-file').click()" class="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-2 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-customers-file" accept=".csv" class="hidden" onchange="importCustomersExcel(event)">
+                            <button onclick="exportCustomersExcel()" class="bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-2 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                            <button onclick="printSection('customers')" class="bg-slate-800 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-slate-900 transition flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> Print PDF
+                            </button>
+                            <button onclick="openModal('customer-modal')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-user-plus"></i> បន្ថែមអតិថិជនថ្មី (Add Customer)
+                            </button>
+                        </div>
+                    </div>
+                    <div id="printable-customers" class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
+                        <div class="print-header-only">
+                            <h2 class="text-xl font-bold text-slate-800">បញ្ជីអតិថិជន (Customers List)</h2>
+                            <p class="text-sm text-slate-500">បុរី ប៊ែល វីឡាសន៍ — កាលបរិច្ឆេទ: <span class="print-today"></span></p>
+                        </div>
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="bg-slate-50 text-slate-600 text-sm uppercase sticky top-0 z-20 shadow-sm font-semibold">
+                                <tr>
+                                    <th class="p-4 bg-slate-50">ឈ្មោះអតិថិជន (Customer Name)</th>
+                                    <th class="p-4 bg-slate-50">ឈ្មោះក្រុមហ៊ុន (Company)</th>
+                                    <th class="p-4 bg-slate-50">លេខទូរស័ព្ទ (Phone)</th>
+                                    <th class="p-4 bg-slate-50">Email</th>
+                                    <th class="p-4 bg-slate-50">អាសយដ្ឋាន (Address)</th>
+                                    <th class="p-4 bg-slate-50 text-center print-hide-col">សកម្មភាព (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customer-table-body" class="divide-y text-base"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- TAB: SUPPLIERS -->
+                <section id="tab-suppliers" class="space-y-6 hidden">
+                    <div class="flex justify-between items-center no-print">
+                        <input type="text" id="search-supplier" placeholder="ស្វែងរកអ្នកផ្គត់ផ្គង់..." class="px-4 py-2.5 border rounded-lg text-base w-72" oninput="renderSuppliers()">
+                        <div class="flex items-center gap-3">
+                            <button onclick="document.getElementById('import-suppliers-file').click()" class="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-2 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-suppliers-file" accept=".csv" class="hidden" onchange="importSuppliersExcel(event)">
+                            <button onclick="exportSuppliersExcel()" class="bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-2 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                            <button onclick="printSection('suppliers')" class="bg-slate-800 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-slate-900 transition flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> Print PDF
+                            </button>
+                            <button onclick="openModal('supplier-modal')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-truck-field"></i> បន្ថែមអ្នកផ្គត់ផ្គង់ថ្មី (Add Supplier)
+                            </button>
+                        </div>
+                    </div>
+                    <div id="printable-suppliers" class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
+                        <div class="print-header-only">
+                            <h2 class="text-xl font-bold text-slate-800">បញ្ជីអ្នកផ្គត់ផ្គង់ (Suppliers List)</h2>
+                            <p class="text-sm text-slate-500">បុរី ប៊ែល វីឡាសន៍ — កាលបរិច្ឆេទ: <span class="print-today"></span></p>
+                        </div>
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="bg-slate-50 text-slate-600 text-sm uppercase sticky top-0 z-20 shadow-sm font-semibold">
+                                <tr>
+                                    <th class="p-4 bg-slate-50">ឈ្មោះអ្នកផ្គត់ផ្គង់ (Supplier Name)</th>
+                                    <th class="p-4 bg-slate-50">ឈ្មោះក្រុមហ៊ុន (Company)</th>
+                                    <th class="p-4 bg-slate-50">លេខទូរស័ព្ទ (Phone)</th>
+                                    <th class="p-4 bg-slate-50">Email</th>
+                                    <th class="p-4 bg-slate-50">អាសយដ្ឋាន (Address)</th>
+                                    <th class="p-4 bg-slate-50 text-center print-hide-col">សកម្មភាព (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supplier-table-body" class="divide-y text-base"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- TAB 3: STOCK IN -->
+                <section id="tab-stockin" class="space-y-6 hidden">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 max-w-xl">
+                        <h3 class="text-xl font-bold text-slate-800 mb-6">ចុះបញ្ជីស្តុកចូល (Stock In)</h3>
+                        <form onsubmit="handleStockIn(event)" class="space-y-5">
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">កាលបរិច្ឆេទ (Date)</label>
+                                <input type="date" id="in-date" required class="w-full px-4 py-2.5 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">ជ្រើសរើសទំនិញ / ស្វែងរក (Select Item)</label>
+                                <input type="text" id="in-item-search" list="in-item-list" placeholder="វាយស្វែងរក ឬជ្រើសរើសទំនិញ..." required class="w-full px-4 py-2.5 border rounded-lg text-base" onchange="handleStockInItemSelect()">
+                                <datalist id="in-item-list"></datalist>
+                                <input type="hidden" id="in-item-code">
+                            </div>
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">បរិមាណចូល (Quantity In) <span id="in-unit-label" class="text-blue-600 font-semibold"></span></label>
+                                <input type="number" id="in-qty" min="1" required class="w-full px-4 py-2.5 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">បរិយាយ / កំណត់ចំណាំ (Note)</label>
+                                <textarea id="in-note" rows="3" placeholder="បញ្ចូលកំណត់ចំណាំបន្ថែម..." class="w-full px-4 py-2.5 border rounded-lg text-base"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium text-base hover:bg-emerald-700 transition">រក្សាទុកស្តុកចូល (Save & Print Voucher)</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- TAB 4: STOCK OUT -->
+                <section id="tab-stockout" class="space-y-6 hidden">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 max-w-xl">
+                        <h3 class="text-xl font-bold text-slate-800 mb-6">ចុះបញ្ជីស្តុកចេញ (Stock Out)</h3>
+                        <form onsubmit="handleStockOut(event)" class="space-y-5">
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">កាលបរិច្ឆេទ (Date)</label>
+                                <input type="date" id="out-date" required class="w-full px-4 py-2.5 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">ជ្រើសរើសអតិថិជន / ស្វែងរក (Select Customer)</label>
+                                <input type="text" id="out-customer-search" list="out-customer-list" placeholder="វាយស្វែងរក ឬជ្រើសរើសអតិថិជន..." class="w-full px-4 py-2.5 border rounded-lg text-base">
+                                <datalist id="out-customer-list"></datalist>
+                            </div>
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">ជ្រើសរើសទំនិញ / ស្វែងរក (Select Item)</label>
+                                <input type="text" id="out-item-search" list="out-item-list" placeholder="វាយស្វែងរក ឬជ្រើសរើសទំនិញ..." required class="w-full px-4 py-2.5 border rounded-lg text-base" onchange="handleStockOutItemSelect()">
+                                <datalist id="out-item-list"></datalist>
+                                <input type="hidden" id="out-item-code">
+                            </div>
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">បរិមាណចេញ (Quantity Out) <span id="out-unit-label" class="text-amber-600 font-semibold"></span></label>
+                                <input type="number" id="out-qty" min="1" required class="w-full px-4 py-2.5 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label class="block text-base font-medium text-slate-700 mb-1.5">បរិយាយ / កំណត់ចំណាំ (Note)</label>
+                                <textarea id="out-note" rows="3" placeholder="បញ្ចូលកំណត់ចំណាំបន្ថែម..." class="w-full px-4 py-2.5 border rounded-lg text-base"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-amber-600 text-white py-3 rounded-lg font-medium text-base hover:bg-amber-700 transition">រក្សាទុកស្តុកចេញ (Save & Print Voucher)</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- TAB 5: TRANSACTIONS HISTORY -->
+                <section id="tab-transactions" class="space-y-6 hidden">
+                    <div class="flex flex-col xl:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border no-print">
+                        <h3 class="text-xl font-bold text-slate-800">ប្រវត្តិប្រតិបត្តិការស្តុក (Stock Transactions History)</h3>
+                        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                            <div class="flex items-center gap-1.5 text-base">
+                                <span class="text-slate-500 text-sm">ពី៖</span>
+                                <input type="date" id="trans-start-date" class="px-3 py-2 border rounded-lg text-base bg-white" onchange="renderTransactions()">
+                            </div>
+                            <div class="flex items-center gap-1.5 text-base">
+                                <span class="text-slate-500 text-sm">ដល់៖</span>
+                                <input type="date" id="trans-end-date" class="px-3 py-2 border rounded-lg text-base bg-white" onchange="renderTransactions()">
+                            </div>
+                            <select id="filter-trans-type" class="px-4 py-2.5 border rounded-lg text-base bg-white" onchange="renderTransactions()">
+                                <option value="">គ្រប់ប្រភេទទាំងអស់ (All Types)</option>
+                                <option value="in">ស្តុកចូល (Stock In)</option>
+                                <option value="out">ស្តុកចេញ (Stock Out)</option>
+                            </select>
+                            <input type="text" id="search-transactions" placeholder="ស្វែងរកក្នុងប្រតិបត្តិការ..." class="px-4 py-2.5 border rounded-lg text-base w-full md:w-44" oninput="renderTransactions()">
+
+                            <button onclick="document.getElementById('import-transactions-file').click()" class="bg-emerald-600 text-white px-3 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-1.5 whitespace-nowrap admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-transactions-file" accept=".csv" class="hidden" onchange="importTransactionsExcel(event)">
+
+                            <button onclick="exportTransactionsToCSV()" class="bg-emerald-700 text-white px-3 py-2.5 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-1.5 whitespace-nowrap admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+
+                            <button onclick="printSection('transactions')" class="bg-slate-800 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+                                <i class="fa-solid fa-print"></i> Print PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="printable-transactions" class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
+                        <div class="print-header-only">
+                            <h2 class="text-xl font-bold text-slate-800">ប្រវត្តិប្រតិបត្តិការស្តុក (Stock Transactions History)</h2>
+                            <p class="text-sm text-slate-500">បុរី ប៊ែល វីឡាសន៍ — កាលបរិច្ឆេទ: <span class="print-today"></span></p>
+                        </div>
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="bg-slate-50 text-slate-600 text-sm uppercase sticky top-0 z-20 shadow-sm font-semibold">
+                                <tr>
+                                    <th class="p-4 bg-slate-50">កាលបរិច្ឆេទ (Date)</th>
+                                    <th class="p-4 bg-slate-50">ប្រភេទ (Type)</th>
+                                    <th class="p-4 bg-slate-50">អតិថិជន / អ្នកផ្គត់ផ្គង់ (Customer / Supplier)</th>
+                                    <th class="p-4 bg-slate-50">កូដទំនិញ (Item Code)</th>
+                                    <th class="p-4 bg-slate-50">ឈ្មោះទំនិញ (Item Name)</th>
+                                    <th class="p-4 bg-slate-50 text-center">បរិមាណ (Quantity)</th>
+                                    <th class="p-4 bg-slate-50">បរិយាយ / កំណត់ចំណាំ (Note)</th>
+                                    <th class="p-4 bg-slate-50 text-center print-hide-col">សកម្មភាព (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-table-body" class="divide-y text-base"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- TAB 6: REPORTS -->
+                <section id="tab-reports" class="space-y-6 hidden">
+                    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 no-print bg-white p-4 rounded-xl shadow-sm border">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">របាយការណ៍ស្តុកទំនិញសរុប</h3>
+                            <p class="text-base text-slate-500">ច្រោះមុខទំនិញពាក់ព័ន្ធតាមប្រភេទ (Stock In / Stock Out / Balance) និងកាលបរិច្ឆេទ (ពី - ដល់)។</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                            <div class="flex items-center gap-1.5 text-base">
+                                <span class="text-slate-500 text-sm">ពី៖</span>
+                                <input type="date" id="report-start-date" class="px-3 py-2 border rounded-lg text-base bg-white" onchange="renderReports()">
+                            </div>
+                            <div class="flex items-center gap-1.5 text-base">
+                                <span class="text-slate-500 text-sm">ដល់៖</span>
+                                <input type="date" id="report-end-date" class="px-3 py-2 border rounded-lg text-base bg-white" onchange="renderReports()">
+                            </div>
+                            <select id="filter-report-type" class="px-3.5 py-2 border rounded-lg text-base bg-white" onchange="renderReports()">
+                                <option value="">គ្រប់ប្រភេទទាំងអស់ (All Types)</option>
+                                <option value="in">ស្តុកចូល (Stock In)</option>
+                                <option value="out">ស្តុកចេញ (Stock Out)</option>
+                                <option value="balance">ស្តុកចុងគ្រា (Balance)</option>
+                            </select>
+                            <input type="text" id="search-report" placeholder="ស្វែងរក..." class="px-3.5 py-2 border rounded-lg text-base w-44" oninput="renderReports()">
+                            <button type="button" onclick="clearReportFilters()" class="bg-slate-100 text-slate-700 border px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-200 transition">
+                                សម្អាតតម្រង
+                            </button>
+
+                            <button onclick="document.getElementById('import-reports-file').click()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-base font-medium hover:bg-emerald-700 transition flex items-center gap-1.5 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Import Excel
+                            </button>
+                            <input type="file" id="import-reports-file" accept=".csv" class="hidden" onchange="importReportsExcel(event)">
+
+                            <button onclick="exportToCSV()" class="bg-emerald-700 text-white px-3 py-2 rounded-lg text-base font-medium hover:bg-emerald-800 transition flex items-center gap-1.5 admin-only">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+
+                            <button onclick="printSection('reports')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-base font-medium hover:bg-slate-900 transition flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> Print PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="printable-report" class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 space-y-6">
+                        <div class="text-center border-b pb-4">
+                            <h2 class="text-2xl font-bold text-slate-800">របាយការណ៍តុល្យភាពស្តុកទំនិញ</h2>
+                            <p class="text-base text-slate-500 mt-1">
+                                កាលបរិច្ឆេទរបាយការណ៍: <span id="report-date"></span>
+                                <span id="report-range-label" class="ml-2 font-semibold text-blue-600"></span>
+                            </p>
+                        </div>
+                        <div class="overflow-x-auto overflow-y-auto max-h-[60vh]">
+                            <table class="w-full text-left border-collapse border border-slate-200 text-base relative">
+                                <thead id="report-table-head" class="bg-slate-100 text-slate-700 text-sm uppercase sticky top-0 z-20 shadow-sm font-semibold">
+                                    <tr>
+                                        <th class="border p-3.5 bg-slate-100 text-center">ល.រ (No)</th>
+                                        <th class="border p-3.5 bg-slate-100">កូដទំនិញ (Code)</th>
+                                        <th class="border p-3.5 bg-slate-100">ឈ្មោះទំនិញ (Item Name)</th>
+                                        <th class="border p-3.5 bg-slate-100">ប្រភេទ (Category)</th>
+                                        <th class="border p-3.5 bg-slate-100">ឯកតា (Unit)</th>
+                                        <th class="border p-3.5 bg-slate-100 text-center">ស្តុកដើម (Opening)</th>
+                                        <th class="border p-3.5 bg-slate-100 text-center">ចូល (In)</th>
+                                        <th class="border p-3.5 bg-slate-100 text-center">ចេញ (Out)</th>
+                                        <th class="border p-3.5 bg-slate-100 text-center font-bold">ស្តុកចុងគ្រា (Balance)</th>
+                                        <th class="border p-3.5 bg-slate-100 text-right">តម្លៃសរុប ($) (Total Value)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-table-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="flex justify-end pt-4 border-t">
+                            <div class="text-right">
+                                <p class="text-base text-slate-500">តម្លៃស្តុកសរុបទាំងអស់៖</p>
+                                <h3 id="report-grand-total" class="text-2xl font-bold text-indigo-600 mt-1">$0.00</h3>
+                            </div>
+                        </div>
+
+                        <!-- Verification Signatures Section -->
+                        <div class="print-sign-section grid grid-cols-3 gap-6 pt-8 mt-4 border-t border-dashed border-slate-300 text-center text-sm">
+                            <div>
+                                <p class="font-bold text-slate-700">អ្នករៀបចំរបាយការណ៍ (Prepared By)</p>
+                                <div class="h-16 border-b border-dashed border-slate-400 my-2 mx-4"></div>
+                                <p class="text-xs text-slate-500">ហត្ថលេខា និងឈ្មោះ</p>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-700">អ្នកត្រួតពិនិត្យ (Checked By)</p>
+                                <div class="h-16 border-b border-dashed border-slate-400 my-2 mx-4"></div>
+                                <p class="text-xs text-slate-500">ហត្ថលេខា និងឈ្មោះ</p>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-700">អ្នកអនុម័ត (Approved By)</p>
+                                <div class="h-16 border-b border-dashed border-slate-400 my-2 mx-4"></div>
+                                <p class="text-xs text-slate-500">ហត្ថលេខា និងឈ្មោះ</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 7: USER MANAGEMENT (ADMIN ONLY) -->
+                <section id="tab-users" class="space-y-6 hidden">
+                    <div class="flex justify-between items-center no-print">
+                        <h3 class="text-xl font-bold text-slate-800">បញ្ជីគណនីអ្នកប្រើប្រាស់ (User Accounts List)</h3>
+                        <button onclick="openModal('user-modal')" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i> បន្ថែម User ថ្មី (Add New User)
+                        </button>
+                    </div>
+                    <div id="printable-users" class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-y-auto max-h-[70vh]">
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="bg-slate-50 text-slate-600 text-sm uppercase sticky top-0 z-20 shadow-sm font-semibold">
+                                <tr>
+                                    <th class="p-4 bg-slate-50">Username / អ៊ីមែល</th>
+                                    <th class="p-4 bg-slate-50">Role (សិទ្ធិប្រើប្រាស់)</th>
+                                    <th class="p-4 bg-slate-50">ស្ថានភាព (Status)</th>
+                                    <th class="p-4 bg-slate-50 text-center print-hide-col">សកម្មភាព (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="divide-y text-base"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- PRINTABLE VOUCHER MODAL -->
+    <div id="voucher-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-6">
+            <div id="printable-voucher" class="voucher-page bg-white p-6 space-y-6 border border-gray-200 rounded-xl">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border border-amber-500 bg-[#F5EBE0] flex items-center justify-center flex-shrink-0">
+                            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><circle cx='100' cy='100' r='95' fill='%23F5EBE0' stroke='%23D4AF37' stroke-width='4'/><text x='100' y='75' font-family='serif' font-size='50' fill='%23D4AF37' text-anchor='middle' font-weight='bold'>B</text><text x='125' y='95' font-family='serif' font-size='30' fill='%23D4AF37' text-anchor='middle' font-style='italic'>V</text></svg>" alt="Logo" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">បុរី ប៊ែល វីឡាសន៍</h2>
+                            <p class="text-xs text-slate-500">ប្រព័ន្ធគ្រប់គ្រងស្តុកទំនិញ v.01</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <h3 id="v-title" class="text-lg font-bold text-blue-600">ប័ណ្ណស្តុកទំនិញ</h3>
+                        <p class="text-xs text-slate-500 font-mono" id="v-no">លេខប័ណ្ណ: VCH-001</p>
+                        <p class="text-xs text-slate-500" id="v-date">កាលបរិច្ឆេទ: 26-Oct-2026</p>
+                    </div>
+                </div>
+
+                <!-- Info Details -->
+                <div class="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded-lg">
+                    <div>
+                        <p class="text-slate-500 text-xs">ប្រភេទប្រតិបត្តិការ៖ <span id="v-type-desc" class="font-bold text-slate-800">ស្តុកចូល</span></p>
+                        <p class="text-slate-500 text-xs mt-1" id="v-party-container">ភាគីពាក់ព័ន្ធ៖ <span id="v-party-name" class="font-bold text-slate-800">-</span></p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs">អ្នកចេញប័ណ្ណ៖ <span id="v-user" class="font-bold text-slate-800">Admin</span></p>
+                    </div>
+                </div>
+
+                <!-- Table items -->
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-xs uppercase">
+                            <th class="border p-2.5">កូដទំនិញ</th>
+                            <th class="border p-2.5">ឈ្មោះទំនិញ</th>
+                            <th class="border p-2.5 text-center">បរិមាណ</th>
+                            <th class="border p-2.5 text-center">ឯកតា</th>
+                        </tr>
+                    </thead>
+                    <tbody id="v-table-body"></tbody>
+                </table>
+
+                <!-- Note -->
+                <div class="text-sm bg-amber-50/50 p-3 rounded-lg border border-amber-100">
+                    <p class="text-xs text-slate-500 font-semibold">កំណត់ចំណាំ (Note):</p>
+                    <p id="v-note" class="text-slate-700 text-sm mt-0.5">-</p>
+                </div>
+
+                <!-- Signatures -->
+                <div class="grid grid-cols-3 gap-4 pt-8 text-center text-sm">
+                    <div>
+                        <p class="font-bold text-slate-700">អ្នកប្រគល់ (Prepared By)</p>
+                        <div class="h-16 border-b border-dashed my-2"></div>
+                        <p class="text-xs text-slate-500">ហត្ថលេខា និងឈ្មោះ</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-700">អ្នកដឹកជញ្ជូន / បញ្ជូន</p>
+                        <div class="h-16 border-b border-dashed my-2"></div>
+                        <p class="text-xs text-slate-500">ហត្ថលេខា និងឈ្មោះ</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-700">អ្នកទទួល (Received By)</p>
+                        <div class="h-16 border-b border-dashed my-2"></div>
+                        <p class="text-xs text-slate-500">ហត្ថលេខា និងឈ្មោះ</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex justify-end gap-3 no-print pt-4 border-t">
+                <button onclick="closeModal('voucher-modal')" class="px-5 py-2.5 border rounded-lg text-base hover:bg-gray-100">បិទ (Close)</button>
+                <button onclick="printVoucher()" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-base font-medium hover:bg-blue-700 flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> ព្រីនប័ណ្ណ (Print Voucher)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Add Modal -->
+    <div id="product-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5">បន្ថែមទំនិញថ្មី (Add New Product)</h3>
+            <form onsubmit="addProduct(event)" class="space-y-4">
+                <div><label class="block text-base mb-1">កូដទំនិញ (Item Code)</label><input type="text" id="new-code" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">ឈ្មោះទំនិញ (Item Name)</label><input type="text" id="new-name" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div>
+                    <label class="block text-base mb-1">ប្រភេទ (Category)</label>
+                    <input type="text" id="new-category" list="category-list" placeholder="ជ្រើសរើស ឬវាយបញ្ចូលប្រភេទ..." required class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div>
+                    <label class="block text-base mb-1">ប្រភពផ្គត់ផ្គង់ (Supplier)</label>
+                    <select id="new-supplier" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                        <option value="">-- ជ្រើសរើសអ្នកផ្គត់ផ្គង់ --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-base mb-1">ឯកតា (Unit)</label>
+                    <input type="text" id="new-unit" list="unit-list" placeholder="ជ្រើសរើស ឬវាយបញ្ចូលឯកតា..." required class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div><label class="block text-base mb-1">ស្តុកដើមគ្រា (Opening Stock)</label><input type="number" id="new-opening" value="0" min="0" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">តម្លៃដើម ($) (Unit Price)</label><input type="number" id="new-price" value="0.00" step="0.01" min="0" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('product-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-base font-medium">រក្សាទុក (Save)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Edit Modal -->
+    <div id="edit-product-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5 text-blue-600">កែប្រែព័ត៌មានទំនិញ (Edit Product)</h3>
+            <form onsubmit="saveEditProduct(event)" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div><label class="block text-base mb-1">កូដទំនិញ (Item Code)</label><input type="text" id="edit-code-display" disabled class="w-full px-3.5 py-2.5 border rounded-lg text-base bg-gray-100 font-mono"></div>
+                <div><label class="block text-base mb-1">ឈ្មោះទំនិញ (Item Name)</label><input type="text" id="edit-name" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div>
+                    <label class="block text-base mb-1">ប្រភេទ (Category)</label>
+                    <input type="text" id="edit-category" list="category-list" required class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div>
+                    <label class="block text-base mb-1">ប្រភពផ្គត់ផ្គង់ (Supplier)</label>
+                    <select id="edit-supplier" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                        <option value="">-- ជ្រើសរើសអ្នកផ្គត់ផ្គង់ --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-base mb-1">ឯកតា (Unit)</label>
+                    <input type="text" id="edit-unit" list="unit-list" required class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div><label class="block text-base mb-1">ស្តុកដើមគ្រា (Opening Stock)</label><input type="number" id="edit-opening" min="0" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">តម្លៃដើម ($) (Unit Price)</label><input type="number" id="edit-price" step="0.01" min="0" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('edit-product-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-base font-medium">រក្សាទុកការកែប្រែ (Save Changes)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Customer Edit Modal -->
+    <div id="edit-customer-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5 text-blue-600">កែប្រែព័ត៌មានអតិថិជន (Edit Customer)</h3>
+            <form onsubmit="saveEditCustomer(event)" class="space-y-4">
+                <input type="hidden" id="edit-cust-id">
+                <div><label class="block text-base mb-1">ឈ្មោះអតិថិជន (Customer Name)</label><input type="text" id="edit-cust-name" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">ឈ្មោះក្រុមហ៊ុន (Company Name)</label><input type="text" id="edit-cust-company" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">លេខទូរស័ព្ទ (Phone Number)</label><input type="text" id="edit-cust-phone" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">Email</label><input type="email" id="edit-cust-email" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">អាសយដ្ឋាន (Address)</label><textarea id="edit-cust-address" rows="2" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></textarea></div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('edit-customer-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-base font-medium">រក្សាទុកការកែប្រែ (Save Changes)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supplier Edit Modal -->
+    <div id="edit-supplier-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5 text-blue-600">កែប្រែអ្នកផ្គត់ផ្គង់ (Edit Supplier)</h3>
+            <form onsubmit="saveEditSupplier(event)" class="space-y-4">
+                <input type="hidden" id="edit-supp-id">
+                <div><label class="block text-base mb-1">ឈ្មោះអ្នកផ្គត់ផ្គង់ (Supplier Name)</label><input type="text" id="edit-supp-name" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">ឈ្មោះក្រុមហ៊ុន (Company Name)</label><input type="text" id="edit-supp-company" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">លេខទូរស័ព្ទ (Phone Number)</label><input type="text" id="edit-supp-phone" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">Email</label><input type="email" id="edit-supp-email" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">អាសយដ្ឋាន (Address)</label><textarea id="edit-supp-address" rows="2" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></textarea></div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('edit-supplier-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-base font-medium">រក្សាទុកការកែប្រែ (Save Changes)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transaction Edit Modal -->
+    <div id="edit-transaction-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5 text-blue-600">កែប្រែប្រតិបត្តិការស្តុក (Edit Transaction)</h3>
+            <form onsubmit="saveEditTransaction(event)" class="space-y-4">
+                <input type="hidden" id="edit-trans-id">
+                <input type="hidden" id="edit-trans-col">
+                <div><label class="block text-base mb-1">កាលបរិច្ឆេទ (Date)</label><input type="date" id="edit-trans-date" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div id="edit-trans-party-container">
+                    <label class="block text-base mb-1">អតិថិជន (Customer)</label>
+                    <input type="text" id="edit-trans-party" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div><label class="block text-base mb-1">បរិមាណ (Quantity)</label><input type="number" id="edit-trans-qty" min="1" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">កំណត់ចំណាំ (Note)</label><textarea id="edit-trans-note" rows="2" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></textarea></div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('edit-transaction-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-base font-medium">រក្សាទុកការកែប្រែ (Save Changes)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Add Modal -->
+    <div id="user-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5">បន្ថែមគណនីអ្នកប្រើប្រាស់ថ្មី (Add User)</h3>
+            <form onsubmit="addUser(event)" class="space-y-4">
+                <div>
+                    <label class="block text-base mb-1">ឈ្មោះអ្នកប្រើប្រាស់ (Username) <span class="text-red-500">*</span></label>
+                    <input type="text" id="new-username" placeholder="ឧ. staff01" required class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div>
+                    <label class="block text-base mb-1">អ៊ីមែល (Email) - <span class="text-slate-400 font-normal">បើគ្មាន ទុកទំនេរបាន</span></label>
+                    <input type="email" id="new-user-email" placeholder="staff@bellevillage.com" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div>
+                    <label class="block text-base mb-1">ពាក្យសម្ងាត់ (Password - យ៉ាងតិច 6 តួ) <span class="text-red-500">*</span></label>
+                    <input type="password" id="new-password" minlength="6" required class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div>
+                    <label class="block text-base mb-1">សិទ្ធិប្រើប្រាស់ (Role)</label>
+                    <select id="new-role" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                        <option value="Staff">Staff (បុគ្គលិកទូទៅ)</option>
+                        <option value="Admin">Admin (អ្នកគ្រប់គ្រង)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('user-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-base font-medium">រក្សាទុក (Save)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Edit Modal -->
+    <div id="edit-user-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5 text-blue-600">កែប្រែគណនីអ្នកប្រើប្រាស់ (Edit User)</h3>
+            <form onsubmit="saveEditUser(event)" class="space-y-4">
+                <input type="hidden" id="edit-user-id">
+                <div><label class="block text-base mb-1">ឈ្មោះគណនី / Email</label><input type="text" id="edit-username-display" disabled class="w-full px-3.5 py-2.5 border rounded-lg text-base bg-gray-100"></div>
+                <div>
+                    <label class="block text-base mb-1">សិទ្ធិប្រើប្រាស់ (Role)</label>
+                    <select id="edit-user-role" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                        <option value="Staff">Staff (បុគ្គលិកទូទៅ)</option>
+                        <option value="Admin">Admin (អ្នកគ្រប់គ្រង)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-base mb-1">ស្ថានភាពគណនី (Status)</label>
+                    <select id="edit-user-status" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                        <option value="active">សកម្ម (Active)</option>
+                        <option value="disabled">បិទសិទ្ធិ (Disabled)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-base mb-1">ពាក្យសម្ងាត់ថ្មី (New Password) - <span class="text-slate-400 font-normal">ទុកទំនេរ បើមិនប្តូរ</span></label>
+                    <input type="password" id="edit-user-new-password" minlength="6" placeholder="យ៉ាងតិច 6 តួ" class="w-full px-3.5 py-2.5 border rounded-lg text-base">
+                </div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('edit-user-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-base font-medium">រក្សាទុកការកែប្រែ (Save Changes)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Datalist for Categories & Units -->
+    <datalist id="category-list">
+        <option value="ដែក">
+        <option value="ស៊ីម៉ង់ត៍">
+        <option value="ឥដ្ឋ">
+        <option value="ខ្សាច់">
+        <option value="ថ្នាំលាប">
+        <option value="បរិក្ខារតបណ្តាញអគ្គិសនី">
+        <option value="បរិក្ខារតបណ្តាញទឹក">
+        <option value="បរិក្ខារអេឡិកត្រូនិក">
+        <option value="បរិក្ខារធ្វើពិដាន">
+    </datalist>
+    <datalist id="unit-list">
+        <option value="រាយ"><option value="កញ្ចប់"><option value="គីឡូក្រាម"><option value="ដុំ"><option value="ម៉ែត្រ"><option value="ដើម"><option value="សន្លឹក"><option value="លីត្រ"><option value="ប្រអប់"><option value="បាវ"><option value="តោន"><option value="ការុង"><option value="សុង">
+    </datalist>
+
+    <!-- Customer Add Modal -->
+    <div id="customer-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5">បន្ថែមអតិថិជនថ្មី (Add New Customer)</h3>
+            <form onsubmit="addCustomer(event)" class="space-y-4">
+                <div><label class="block text-base mb-1">ឈ្មោះអតិថិជន (Customer Name)</label><input type="text" id="cust-name" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">ឈ្មោះក្រុមហ៊ុន (Company Name)</label><input type="text" id="cust-company" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">លេខទូរស័ព្ទ (Phone Number)</label><input type="text" id="cust-phone" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">Email</label><input type="email" id="cust-email" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">អាសយដ្ឋាន (Address)</label><textarea id="cust-address" rows="2" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></textarea></div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('customer-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-base font-medium">រក្សាទុក (Save)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supplier Add Modal -->
+    <div id="supplier-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md shadow-lg">
+            <h3 class="text-xl font-bold mb-5">បន្ថែមអ្នកផ្គត់ផ្គង់ថ្មី (Add New Supplier)</h3>
+            <form onsubmit="addSupplier(event)" class="space-y-4">
+                <div><label class="block text-base mb-1">ឈ្មោះអ្នកផ្គត់ផ្គង់ (Supplier Name)</label><input type="text" id="supp-name" required class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">ឈ្មោះក្រុមហ៊ុន (Company Name)</label><input type="text" id="supp-company" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">លេខទូរស័ព្ទ (Phone Number)</label><input type="text" id="supp-phone" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">Email</label><input type="email" id="supp-email" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></div>
+                <div><label class="block text-base mb-1">អាសយដ្ឋាន (Address)</label><textarea id="supp-address" rows="2" class="w-full px-3.5 py-2.5 border rounded-lg text-base"></textarea></div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModal('supplier-modal')" class="px-5 py-2.5 border rounded-lg text-base">បោះបង់ (Cancel)</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-base font-medium">រក្សាទុក (Save)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Configuration -->
+    <script>
+        // FIREBASE INITIALIZATION
+        const firebaseConfig = {
+          apiKey: "AIzaSyCdiUC-dPxmJpjE-JCFkHji5WxyORnOWbg",
+          authDomain: "siob-inventory.firebaseapp.com",
+          projectId: "siob-inventory",
+          storageBucket: "siob-inventory.firebasestorage.app",
+          messagingSenderId: "332201616814",
+          appId: "1:332201616814:web:d6ada9e2d3cfc46a80943f",
+          measurementId: "G-T7WEM1QDTR"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const secondaryApp = firebase.apps.find(a => a.name === "SecondaryAuthApp")
+            || firebase.initializeApp(firebaseConfig, "SecondaryAuthApp");
+        const secondaryAuth = secondaryApp.auth();
+
+        let users = [];
+        let suppliers = [];
+        let products = [];
+        let customers = [];
+        let stockIn = [];
+        let stockOut = [];
+        let currentUser = null;
+        let stockChartInstance = null;
+        let listenersInitialized = false;
+
+        function isAdminUser() {
+            return !!(currentUser && String(currentUser.role || '').toLowerCase() === 'admin');
+        }
+
+        function normalizeCode(code) {
+            return String(code || '').trim().toLowerCase();
+        }
+
+        function normalizeDateStr(d) {
+            if (!d) return '';
+            let s = String(d).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+            let parsed = new Date(s);
+            if (!isNaN(parsed)) {
+                let y = parsed.getFullYear();
+                let m = String(parsed.getMonth() + 1).padStart(2, '0');
+                let day = String(parsed.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            }
+            return s;
+        }
+
+        function initRealtimeListeners() {
+            if (listenersInitialized) return;
+            listenersInitialized = true;
+
+            db.collection("users").onSnapshot((snapshot) => {
+                users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (auth.currentUser) {
+                    syncCurrentUserFromFirestore(auth.currentUser);
+                }
+                renderUsers();
+            }, (err) => console.warn("Users listener:", err.message));
+
+            db.collection("products").onSnapshot((snapshot) => {
+                products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderInventory();
+                renderDashboard();
+                renderReports();
+                populateDropdowns();
+            }, (err) => console.warn("Products listener:", err.message));
+
+            db.collection("customers").onSnapshot((snapshot) => {
+                customers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCustomers();
+                populateDropdowns();
+            }, (err) => console.warn("Customers listener:", err.message));
+
+            db.collection("suppliers").onSnapshot((snapshot) => {
+                suppliers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSuppliers();
+                populateSupplierDropdowns();
+            }, (err) => console.warn("Suppliers listener:", err.message));
+
+            db.collection("stockIn").onSnapshot((snapshot) => {
+                stockIn = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTransactions();
+                renderDashboard();
+                renderInventory();
+                renderReports();
+            }, (err) => console.warn("StockIn listener:", err.message));
+
+            db.collection("stockOut").onSnapshot((snapshot) => {
+                stockOut = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTransactions();
+                renderDashboard();
+                renderInventory();
+                renderReports();
+            }, (err) => console.warn("StockOut listener:", err.message));
+        }
+
+        function syncCurrentUserFromFirestore(fbUser) {
+            if (!fbUser) return;
+            let matched = users.find(u => u.id === fbUser.uid || u.uid === fbUser.uid || (u.email && u.email.toLowerCase() === (fbUser.email || '').toLowerCase()));
+            if (matched) {
+                if (matched.status === 'disabled') {
+                    alert('គណនីរបស់អ្នកត្រូវបានបិទសិទ្ធិ (Disabled) មិនអាចចូលប្រើប្រាស់បានទេ!');
+                    auth.signOut();
+                    return;
+                }
+                currentUser = {
+                    uid: fbUser.uid,
+                    email: fbUser.email,
+                    username: matched.username || fbUser.email.split('@')[0],
+                    role: matched.role || 'Staff',
+                    status: matched.status || 'active'
+                };
+            } else {
+                let isDefaultAdmin = (fbUser.email || '').toLowerCase() === 'admin@bellevillage.com' || (fbUser.email || '').toLowerCase() === 'admin@siob-inventory.local' || (fbUser.email || '').toLowerCase() === 'ravy.phan@gmail.com';
+                currentUser = {
+                    uid: fbUser.uid,
+                    email: fbUser.email,
+                    username: fbUser.email.split('@')[0],
+                    role: isDefaultAdmin ? 'Admin' : 'Staff',
+                    status: 'active'
+                };
+            }
+            checkAuth();
+        }
+
+        auth.onAuthStateChanged(async (fbUser) => {
+            if (fbUser) {
+                initRealtimeListeners();
+                try {
+                    let docSnap = await db.collection("users").doc(fbUser.uid).get();
+                    if (docSnap.exists) {
+                        let data = docSnap.data();
+                        if (data.status === 'disabled') {
+                            alert('គណនីរបស់អ្នកត្រូវបានបិទសិទ្ធិ (Disabled) មិនអាចចូលប្រើប្រាស់បានទេ!');
+                            await auth.signOut();
+                            return;
+                        }
+                        currentUser = {
+                            uid: fbUser.uid,
+                            email: fbUser.email,
+                            username: data.username || fbUser.email.split('@')[0],
+                            role: data.role || 'Staff',
+                            status: data.status || 'active'
+                        };
+                    } else {
+                        syncCurrentUserFromFirestore(fbUser);
+                    }
+                } catch (e) {
+                    syncCurrentUserFromFirestore(fbUser);
+                }
+                checkAuth();
+            } else {
+                currentUser = null;
+                checkAuth();
+            }
+        });
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            let d = new Date(dateStr);
+            if (isNaN(d)) return dateStr;
+            let day = String(d.getDate()).padStart(2, '0');
+            let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            let month = months[d.getMonth()];
+            let year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        function parseCSVRow(row) {
+            let result = [];
+            let insideQuote = false;
+            let entry = '';
+            for (let i = 0; i < row.length; i++) {
+                let char = row[i];
+                if (char === '"' || char === "'") {
+                    insideQuote = !insideQuote;
+                } else if (char === ',' && !insideQuote) {
+                    result.push(entry.trim().replace(/^["']|["']$/g, ''));
+                    entry = '';
+                } else {
+                    entry += char;
+                }
+            }
+            result.push(entry.trim().replace(/^["']|["']$/g, ''));
+            return result;
+        }
+
+        function normalizeLoginEmail(input) {
+            let trimmed = input.trim();
+            if (trimmed.includes('@')) return trimmed;
+            return `${trimmed}@siob-inventory.local`;
+        }
+
+        function sendPasswordResetForEmail(email) {
+            return auth.sendPasswordResetEmail(email).then(() => {
+                alert('បានផ្ញើតំណភ្ជាប់ Reset Password ទៅកាន់អ៊ីមែល៖ ' + email + '\nសូមពិនិត្យ Inbox ឬ Spam របស់អ្នក។');
+            }).catch((err) => {
+                alert('មិនអាចផ្ញើអ៊ីមែល Reset Password បានទេ៖ ' + err.message);
+            });
+        }
+
+        function handleForgotPassword() {
+            let currentInput = document.getElementById('login-user').value.trim();
+            let targetEmail = currentInput ? normalizeLoginEmail(currentInput) : '';
+            let entered = prompt('សូមបញ្ចូលអ៊ីមែល ឬ Username របស់គណនីដើម្បី Reset Password៖', targetEmail);
+            if (!entered || !entered.trim()) return;
+            sendPasswordResetForEmail(normalizeLoginEmail(entered));
+        }
+
+        function sendUserResetPassword(userId) {
+            if (!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិ Reset Password ទេ (Admin Only)!');
+                return;
+            }
+            let u = users.find(x => x.id === userId);
+            if (!u) return;
+            let email = u.email || normalizeLoginEmail(u.username || '');
+            if (!email || !email.includes('@')) {
+                alert('គណនីនេះមិនទាន់មានអ៊ីមែលត្រឹមត្រូវសម្រាប់ Reset Password ទេ។');
+                return;
+            }
+            if (confirm(`តើអ្នកចង់ផ្ញើអ៊ីមែល Reset Password ទៅកាន់ "${email}" មែនទេ?`)) {
+                sendPasswordResetForEmail(email);
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            let u = document.getElementById('login-user').value.trim();
+            let p = document.getElementById('login-pass').value.trim();
+            let loginEmail = normalizeLoginEmail(u);
+            let btn = document.getElementById('login-submit-btn');
+
+            btn.disabled = true;
+            btn.innerText = 'កំពុងចូលប្រព័ន្ធ...';
+
+            auth.signInWithEmailAndPassword(loginEmail, p)
+                .then((cred) => {
+                    btn.disabled = false;
+                    btn.innerText = 'ចូលប្រព័ន្ធ (Login)';
+                    return db.collection("users").doc(cred.user.uid).get().then((docSnap) => {
+                        if (!docSnap.exists) {
+                            let isAdmin = (loginEmail.toLowerCase() === 'admin@bellevillage.com' || loginEmail.toLowerCase() === 'admin@siob-inventory.local' || loginEmail.toLowerCase() === 'ravy.phan@gmail.com');
+                            return db.collection("users").doc(cred.user.uid).set({
+                                uid: cred.user.uid,
+                                email: loginEmail,
+                                username: u,
+                                role: isAdmin ? 'Admin' : 'Staff',
+                                status: 'active'
+                            });
+                        }
+                    });
+                })
+                .catch((err) => {
+                    btn.disabled = false;
+                    btn.innerText = 'ចូលប្រព័ន្ធ (Login)';
+                    alert('ឈ្មោះអ្នកប្រើប្រាស់ / អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ!');
+                });
+        }
+
+        function handleLogout() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                checkAuth();
+            });
+        }
+
+        function checkAuth() {
+            if(currentUser) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('current-username').innerText = currentUser.username;
+                document.getElementById('current-role').innerText = currentUser.role;
+
+                let adminElements = document.querySelectorAll('.admin-only');
+                adminElements.forEach(el => {
+                    el.style.display = isAdminUser() ? 'flex' : 'none';
+                });
+
+                switchTab('dashboard');
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-screen').classList.add('hidden');
+            }
+        }
+
+        function switchTab(tabId) {
+            if(tabId === 'users' && !isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិចូលមើលផ្ទាំងគ្រប់គ្រងអ្នកប្រើប្រាស់ទេ (Admin Only)!');
+                tabId = 'dashboard';
+            }
+
+            ['dashboard', 'inventory', 'customers', 'suppliers', 'stockin', 'stockout', 'transactions', 'reports', 'users'].forEach(t => {
+                let el = document.getElementById('tab-' + t);
+                let nav = document.getElementById('nav-' + t);
+                if(el) el.classList.add('hidden');
+                if(nav) {
+                    nav.classList.remove('bg-blue-600', 'text-white');
+                    nav.classList.add('hover:bg-slate-800', 'text-slate-300');
+                }
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            let activeNav = document.getElementById('nav-' + tabId);
+            if(activeNav) {
+                activeNav.classList.add('bg-blue-600', 'text-white');
+                activeNav.classList.remove('hover:bg-slate-800', 'text-slate-300');
+            }
+
+            const titles = {
+                'dashboard': 'ផ្ទាំងដើម (Dashboard)',
+                'inventory': 'បញ្ជីទំនិញ (Inventory)',
+                'customers': 'បញ្ជីអតិថិជន (Customers)',
+                'suppliers': 'បញ្ជីអ្នកផ្គត់ផ្គង់ (Suppliers)',
+                'stockin': 'ចុះបញ្ជីស្តុកចូល (Stock In)',
+                'stockout': 'ចុះបញ្ជីស្តុកចេញ (Stock Out)',
+                'transactions': 'ប្រវត្តិប្រតិបត្តិការស្តុក (Transactions History)',
+                'reports': 'របាយការណ៍ស្តុកទំនិញ (Reports)',
+                'users': 'គ្រប់គ្រងអ្នកប្រើប្រាស់ (User Management)'
+            };
+            document.getElementById('page-title').innerText = titles[tabId];
+
+            if(tabId === 'dashboard') renderDashboard();
+            if(tabId === 'inventory') renderInventory();
+            if(tabId === 'customers') renderCustomers();
+            if(tabId === 'suppliers') renderSuppliers();
+            if(tabId === 'stockin' || tabId === 'stockout') {
+                populateDropdowns();
+            }
+            if(tabId === 'transactions') renderTransactions();
+            if(tabId === 'reports') renderReports();
+            if(tabId === 'users') renderUsers();
+        }
+
+        function getTotals(code) {
+            let targetCode = normalizeCode(code);
+            let totalIn = stockIn.filter(i => normalizeCode(i.code) === targetCode).reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
+            let totalOut = stockOut.filter(i => normalizeCode(i.code) === targetCode).reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
+            return { totalIn, totalOut };
+        }
+
+        function renderDashboard() {
+            document.getElementById('stat-total-items').innerText = products.length;
+            document.getElementById('stat-total-in').innerText = stockIn.reduce((acc, curr) => acc + (Number(curr.qty) || 0), 0);
+            document.getElementById('stat-total-out').innerText = stockOut.reduce((acc, curr) => acc + (Number(curr.qty) || 0), 0);
+
+            let totalVal = products.reduce((acc, p) => {
+                let t = getTotals(p.code);
+                let balance = (Number(p.opening) || 0) + t.totalIn - t.totalOut;
+                return acc + (balance * (Number(p.price) || 0));
+            }, 0);
+            document.getElementById('stat-total-value').innerText = '$' + totalVal.toFixed(2);
+
+            renderChart();
+        }
+
+        function renderChart() {
+            let ctx = document.getElementById('stockChart');
+            if(!ctx) return;
+
+            let labels = products.map(p => p.name || p.code);
+            let dataIn = products.map(p => getTotals(p.code).totalIn);
+            let dataOut = products.map(p => getTotals(p.code).totalOut);
+
+            if(stockChartInstance) {
+                stockChartInstance.destroy();
+            }
+
+            stockChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'ស្តុកចូល (Stock In)',
+                            data: dataIn,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'ស្តុកចេញ (Stock Out)',
+                            data: dataOut,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: 'rgb(245, 158, 11)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderInventory() {
+            let search = document.getElementById('search-inventory') ? document.getElementById('search-inventory').value.toLowerCase() : '';
+            let tbody = document.getElementById('inventory-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let isAdmin = isAdminUser();
+
+            let sortedProducts = [...products].sort((a, b) => {
+                let timeA = a.createdAt ? a.createdAt.toMillis() : 0;
+                let timeB = b.createdAt ? b.createdAt.toMillis() : 0;
+                if(timeA === timeB) return b.id.localeCompare(a.id);
+                return timeB - timeA;
+            });
+
+            sortedProducts.filter(p => (p.name && p.name.toLowerCase().includes(search)) || (p.code && p.code.toLowerCase().includes(search))).forEach(p => {
+                let { totalIn, totalOut } = getTotals(p.code);
+                let balance = (Number(p.opening) || 0) + totalIn - totalOut;
+
+                let actionBtns = isAdmin ? `
+                    <button onclick="openEditModal('${p.id}')" class="text-blue-600 hover:text-blue-800 mr-3 text-lg" title="កែប្រែ"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-700 text-lg" title="លុប"><i class="fa-solid fa-trash"></i></button>
+                ` : '<span class="text-sm text-slate-400">គ្មានសិទ្ធិ</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-4 font-mono text-blue-600 font-medium">${p.code}</td>
+                        <td class="p-4 font-medium">${p.name}</td>
+                        <td class="p-4 text-slate-500">${p.category}</td>
+                        <td class="p-4 text-slate-600">${p.supplier || '-'}</td>
+                        <td class="p-4 font-semibold text-slate-700">${p.unit || '-'}</td>
+                        <td class="p-4 text-center">${Number(p.opening) || 0}</td>
+                        <td class="p-4 text-center text-emerald-600 font-medium">+${totalIn}</td>
+                        <td class="p-4 text-center text-amber-600 font-medium">-${totalOut}</td>
+                        <td class="p-4 text-center font-bold">${balance}</td>
+                        <td class="p-4 text-center">$${(Number(p.price) || 0).toFixed(2)}</td>
+                        <td class="p-4 text-center print-hide-col">${actionBtns}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderCustomers() {
+            let search = document.getElementById('search-customer') ? document.getElementById('search-customer').value.toLowerCase() : '';
+            let tbody = document.getElementById('customer-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let isAdmin = isAdminUser();
+
+            let sortedCustomers = [...customers].sort((a, b) => {
+                let timeA = a.createdAt ? a.createdAt.toMillis() : 0;
+                let timeB = b.createdAt ? b.createdAt.toMillis() : 0;
+                if(timeA === timeB) return b.id.localeCompare(a.id);
+                return timeB - timeA;
+            });
+
+            sortedCustomers.filter(c => (c.name && c.name.toLowerCase().includes(search)) || (c.company && c.company.toLowerCase().includes(search))).forEach((c) => {
+                let actionBtns = '<span class="text-sm text-slate-400">គ្មានសិទ្ធិ</span>';
+                if(isAdmin) {
+                    actionBtns = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="openEditCustomerModal('${c.id}')" class="text-blue-600 hover:text-blue-800 text-lg" title="កែប្រែ"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteCustomer('${c.id}')" class="text-red-500 hover:text-red-700 text-lg" title="លុប"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                }
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-4 font-medium text-slate-800">${c.name}</td>
+                        <td class="p-4 text-slate-600">${c.company || '-'}</td>
+                        <td class="p-4 text-slate-600">${c.phone || '-'}</td>
+                        <td class="p-4 text-slate-600">${c.email || '-'}</td>
+                        <td class="p-4 text-slate-600">${c.address || '-'}</td>
+                        <td class="p-4 text-center print-hide-col">${actionBtns}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderSuppliers() {
+            let search = document.getElementById('search-supplier') ? document.getElementById('search-supplier').value.toLowerCase() : '';
+            let tbody = document.getElementById('supplier-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let isAdmin = isAdminUser();
+
+            let sortedSuppliers = [...suppliers].sort((a, b) => {
+                let timeA = a.createdAt ? a.createdAt.toMillis() : 0;
+                let timeB = b.createdAt ? b.createdAt.toMillis() : 0;
+                if(timeA === timeB) return b.id.localeCompare(a.id);
+                return timeB - timeA;
+            });
+
+            sortedSuppliers.filter(s => (s.name && s.name.toLowerCase().includes(search)) || (s.company && s.company.toLowerCase().includes(search))).forEach((s) => {
+                let actionBtns = '<span class="text-sm text-slate-400">គ្មានសិទ្ធិ</span>';
+                if(isAdmin) {
+                    actionBtns = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="openEditSupplierModal('${s.id}')" class="text-blue-600 hover:text-blue-800 text-lg" title="កែប្រែ"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteSupplier('${s.id}')" class="text-red-500 hover:text-red-700 text-lg" title="លុប"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                }
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-4 font-medium text-slate-800">${s.name}</td>
+                        <td class="p-4 text-slate-600">${s.company || '-'}</td>
+                        <td class="p-4 text-slate-600">${s.phone || '-'}</td>
+                        <td class="p-4 text-slate-600">${s.email || '-'}</td>
+                        <td class="p-4 text-slate-600">${s.address || '-'}</td>
+                        <td class="p-4 text-center print-hide-col">${actionBtns}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addProduct(e) {
+            e.preventDefault();
+            let code = document.getElementById('new-code').value.trim();
+            
+            if(products.some(p => normalizeCode(p.code) === normalizeCode(code))) {
+                alert('ទិន្ន័យនេះស្ទួនគ្នា សូមបញ្ចូលម្តងទៀត!');
+                return;
+            }
+
+            db.collection("products").add({
+                code: code,
+                name: document.getElementById('new-name').value.trim(),
+                category: document.getElementById('new-category').value.trim(),
+                supplier: document.getElementById('new-supplier').value,
+                unit: document.getElementById('new-unit').value.trim(),
+                opening: Number(document.getElementById('new-opening').value),
+                price: Number(document.getElementById('new-price').value),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                closeModal('product-modal');
+                alert('បានបន្ថែមទំនិញថ្មីជោគជ័យ!');
+                e.target.reset();
+            });
+        }
+
+        function openEditModal(id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let p = products.find(x => x.id === id);
+            if(!p) return;
+            populateSupplierDropdowns();
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('edit-code-display').value = p.code;
+            document.getElementById('edit-name').value = p.name;
+            document.getElementById('edit-category').value = p.category;
+            document.getElementById('edit-supplier').value = p.supplier || '';
+            document.getElementById('edit-unit').value = p.unit;
+            document.getElementById('edit-opening').value = p.opening || 0;
+            document.getElementById('edit-price').value = p.price || 0;
+            openModal('edit-product-modal');
+        }
+
+        function saveEditProduct(e) {
+            e.preventDefault();
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let id = document.getElementById('edit-id').value;
+            db.collection("products").doc(id).update({
+                name: document.getElementById('edit-name').value.trim(),
+                category: document.getElementById('edit-category').value.trim(),
+                supplier: document.getElementById('edit-supplier').value,
+                unit: document.getElementById('edit-unit').value.trim(),
+                opening: Number(document.getElementById('edit-opening').value),
+                price: Number(document.getElementById('edit-price').value)
+            }).then(() => {
+                closeModal('edit-product-modal');
+                alert('បានកែប្រែទំនិញជោគជ័យ!');
+            });
+        }
+
+        function deleteProduct(id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិលុបទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            if(confirm('តើអ្នកពិតជាចង់លុបទំនិញនេះចេញពីស្តុកមែនទេ?')) {
+                db.collection("products").doc(id).delete().then(() => alert('បានលុបទំនិញដោយជោគជ័យ!'));
+            }
+        }
+
+        function addCustomer(e) {
+            e.preventDefault();
+            let name = document.getElementById('cust-name').value.trim();
+
+            if(customers.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                alert('ទិន្ន័យនេះស្ទួនគ្នា សូមបញ្ចូលម្តងទៀត!');
+                return;
+            }
+
+            db.collection("customers").add({
+                name: name,
+                company: document.getElementById('cust-company').value.trim(),
+                phone: document.getElementById('cust-phone').value.trim(),
+                email: document.getElementById('cust-email').value.trim(),
+                address: document.getElementById('cust-address').value.trim(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                closeModal('customer-modal');
+                alert('បានបន្ថែមអតិថិជនថ្មីជោគជ័យ!');
+                e.target.reset();
+            });
+        }
+
+        function openEditCustomerModal(id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let c = customers.find(x => x.id === id);
+            if(!c) return;
+            document.getElementById('edit-cust-id').value = c.id;
+            document.getElementById('edit-cust-name').value = c.name;
+            document.getElementById('edit-cust-company').value = c.company || '';
+            document.getElementById('edit-cust-phone').value = c.phone || '';
+            document.getElementById('edit-cust-email').value = c.email || '';
+            document.getElementById('edit-cust-address').value = c.address || '';
+            openModal('edit-customer-modal');
+        }
+
+        function saveEditCustomer(e) {
+            e.preventDefault();
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let id = document.getElementById('edit-cust-id').value;
+            db.collection("customers").doc(id).update({
+                name: document.getElementById('edit-cust-name').value.trim(),
+                company: document.getElementById('edit-cust-company').value.trim(),
+                phone: document.getElementById('edit-cust-phone').value.trim(),
+                email: document.getElementById('edit-cust-email').value.trim(),
+                address: document.getElementById('edit-cust-address').value.trim()
+            }).then(() => {
+                closeModal('edit-customer-modal');
+                alert('បានកែប្រែអតិថិជនជោគជ័យ!');
+            });
+        }
+
+        function deleteCustomer(id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិលុបទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            if(confirm('តើអ្នកពិតជាចង់លុបអតិថិជននេះមែនទេ?')) {
+                db.collection("customers").doc(id).delete();
+            }
+        }
+
+        function addSupplier(e) {
+            e.preventDefault();
+            let name = document.getElementById('supp-name').value.trim();
+
+            if(suppliers.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+                alert('ទិន្ន័យនេះស្ទួនគ្នា សូមបញ្ចូលម្តងទៀត!');
+                return;
+            }
+
+            db.collection("suppliers").add({
+                name: name,
+                company: document.getElementById('supp-company').value.trim(),
+                phone: document.getElementById('supp-phone').value.trim(),
+                email: document.getElementById('supp-email').value.trim(),
+                address: document.getElementById('supp-address').value.trim(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                closeModal('supplier-modal');
+                alert('បានបន្ថែមអ្នកផ្គត់ផ្គង់ថ្មីជោគជ័យ!');
+                e.target.reset();
+            });
+        }
+
+        function openEditSupplierModal(id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let s = suppliers.find(x => x.id === id);
+            if(!s) return;
+            document.getElementById('edit-supp-id').value = s.id;
+            document.getElementById('edit-supp-name').value = s.name;
+            document.getElementById('edit-supp-company').value = s.company || '';
+            document.getElementById('edit-supp-phone').value = s.phone || '';
+            document.getElementById('edit-supp-email').value = s.email || '';
+            document.getElementById('edit-supp-address').value = s.address || '';
+            openModal('edit-supplier-modal');
+        }
+
+        function saveEditSupplier(e) {
+            e.preventDefault();
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let id = document.getElementById('edit-supp-id').value;
+            db.collection("suppliers").doc(id).update({
+                name: document.getElementById('edit-supp-name').value.trim(),
+                company: document.getElementById('edit-supp-company').value.trim(),
+                phone: document.getElementById('edit-supp-phone').value.trim(),
+                email: document.getElementById('edit-supp-email').value.trim(),
+                address: document.getElementById('edit-supp-address').value.trim()
+            }).then(() => {
+                closeModal('edit-supplier-modal');
+                alert('បានកែប្រែអ្នកផ្គត់ផ្គង់ជោគជ័យ!');
+            });
+        }
+
+        function deleteSupplier(id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិលុបទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            if(confirm('តើអ្នកពិតជាចង់លុបអ្នកផ្គត់ផ្គង់នេះមែនទេ?')) {
+                db.collection("suppliers").doc(id).delete();
+            }
+        }
+
+        function addUser(e) {
+            e.preventDefault();
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិបន្ថែមគណនីទេ (Admin Only)!');
+                return;
+            }
+            let rawEmail = document.getElementById('new-user-email').value.trim();
+            let username = document.getElementById('new-username').value.trim();
+            let pass = document.getElementById('new-password').value.trim();
+            let role = document.getElementById('new-role').value;
+
+            let finalEmail = rawEmail ? rawEmail : `${username}@siob-inventory.local`;
+
+            secondaryAuth.createUserWithEmailAndPassword(finalEmail, pass)
+                .then(async (cred) => {
+                    let newUid = cred.user.uid;
+                    await secondaryAuth.signOut();
+                    return db.collection("users").doc(newUid).set({
+                        uid: newUid,
+                        email: finalEmail,
+                        username: username,
+                        role: role,
+                        status: 'active',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    closeModal('user-modal');
+                    alert(`បានបង្កើតគណនី "${username}" ដោយជោគជ័យ!`);
+                    e.target.reset();
+                })
+                .catch(async (err) => {
+                    try { await secondaryAuth.signOut(); } catch (_) {}
+                    alert('មិនអាចបង្កើតគណនីបានទេ៖ ' + err.message);
+                });
+        }
+
+        function openEditUserModal(id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែគណនីទេ (Admin Only)!');
+                return;
+            }
+            let u = users.find(x => x.id === id);
+            if(!u) return;
+            document.getElementById('edit-user-id').value = u.id;
+            document.getElementById('edit-username-display').value = u.username || u.email;
+            document.getElementById('edit-user-role').value = u.role || 'Staff';
+            document.getElementById('edit-user-status').value = u.status || 'active';
+            document.getElementById('edit-user-new-password').value = '';
+            openModal('edit-user-modal');
+        }
+
+        async function saveEditUser(e) {
+            e.preventDefault();
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែគណនីទេ (Admin Only)!');
+                return;
+            }
+            let id = document.getElementById('edit-user-id').value;
+            let role = document.getElementById('edit-user-role').value;
+            let status = document.getElementById('edit-user-status').value;
+            let newPass = document.getElementById('edit-user-new-password').value.trim();
+            let u = users.find(x => x.id === id);
+
+            try {
+                await db.collection("users").doc(id).update({ role, status });
+
+                if (newPass && u) {
+                    let targetEmail = u.email || normalizeLoginEmail(u.username || '');
+                    if (targetEmail && targetEmail.includes('@')) {
+                        try {
+                            await secondaryAuth.createUserWithEmailAndPassword(targetEmail, newPass);
+                            await secondaryAuth.signOut();
+                            alert('បានកំណត់ពាក្យសម្ងាត់ថ្មី និងរក្សាទុកព័ត៌មានគណនីជោគជ័យ! (សូមពិនិត្យ Users ក្នុង Firebase Auth ប្រសិនបើមានគណនីស្ទួន UID ចាស់)');
+                        } catch (authErr) {
+                            try { await secondaryAuth.signOut(); } catch (_) {}
+                            if (authErr.code === 'auth/email-already-in-use') {
+                                alert('បានរក្សាទុក Role/Status រួចហើយ។ ដោយសារ Email នេះមានរួចក្នុង Firebase Auth រួចហើយ សូមចុចប៊ូតុងសោ (Reset Password) ដើម្បីផ្ញើ Link កំណត់ Password ថ្មី ឬលុបគណនីចាស់ក្នុង Firebase Console -> Authentication -> Users ជាមុនសិន មុនពេលកំណត់ Password ថ្មីផ្ទាល់។');
+                            } else {
+                                alert('បានរក្សាទុក Role/Status រួចហើយ ប៉ុន្តែមិនអាចកំណត់ Password ថ្មីបានទេ៖ ' + authErr.message);
+                            }
+                        }
+                    }
+                } else {
+                    alert('បានកែប្រែព័ត៌មានគណនីជោគជ័យ!');
+                }
+                closeModal('edit-user-modal');
+            } catch (err) {
+                alert('មានបញ្ហាក្នុងការរក្សាទុក៖ ' + err.message);
+            }
+        }
+
+        function handleStockInItemSelect() {
+            let val = document.getElementById('in-item-search').value;
+            let found = products.find(p => `${p.code} - ${p.name}${p.unit ? ' ['+p.unit+']' : ''}` === val || normalizeCode(p.code) === normalizeCode(val) || p.name === val);
+            if(found) {
+                document.getElementById('in-item-code').value = found.code;
+                document.getElementById('in-unit-label').innerText = found.unit ? `(${found.unit})` : '';
+            } else {
+                document.getElementById('in-item-code').value = val.trim();
+                document.getElementById('in-unit-label').innerText = '';
+            }
+        }
+
+        function handleStockOutItemSelect() {
+            let val = document.getElementById('out-item-search').value;
+            let found = products.find(p => `${p.code} - ${p.name}${p.unit ? ' ['+p.unit+']' : ''}` === val || normalizeCode(p.code) === normalizeCode(val) || p.name === val);
+            if(found) {
+                document.getElementById('out-item-code').value = found.code;
+                document.getElementById('out-unit-label').innerText = found.unit ? `(${found.unit})` : '';
+            } else {
+                document.getElementById('out-item-code').value = val.trim();
+                document.getElementById('out-unit-label').innerText = '';
+            }
+        }
+
+        function handleStockIn(e) {
+            e.preventDefault();
+            let codeVal = (document.getElementById('in-item-code').value || document.getElementById('in-item-search').value).trim();
+            let found = products.find(p => normalizeCode(p.code) === normalizeCode(codeVal) || `${p.code} - ${p.name}${p.unit ? ' ['+p.unit+']' : ''}` === codeVal);
+            let finalCode = found ? found.code : codeVal;
+
+            let newEntry = {
+                date: document.getElementById('in-date').value,
+                code: finalCode,
+                qty: Number(document.getElementById('in-qty').value),
+                note: document.getElementById('in-note').value.trim(),
+                createdBy: currentUser ? currentUser.username : ''
+            };
+            db.collection("stockIn").add(newEntry).then((docRef) => {
+                alert('បានបញ្ចូលស្តុកចូលដោយជោគជ័យ!');
+                e.target.reset();
+                document.getElementById('in-date').valueAsDate = new Date();
+                document.getElementById('in-unit-label').innerText = '';
+                printSpecificTransaction('stockIn', docRef.id);
+            });
+        }
+
+        function handleStockOut(e) {
+            e.preventDefault();
+            let codeVal = (document.getElementById('out-item-code').value || document.getElementById('out-item-search').value).trim();
+            let found = products.find(p => normalizeCode(p.code) === normalizeCode(codeVal) || `${p.code} - ${p.name}${p.unit ? ' ['+p.unit+']' : ''}` === codeVal);
+            let finalCode = found ? found.code : codeVal;
+            let qty = Number(document.getElementById('out-qty').value);
+
+            let p = products.find(x => normalizeCode(x.code) === normalizeCode(finalCode));
+            let { totalIn, totalOut } = getTotals(finalCode);
+            let balance = (Number(p ? p.opening || 0 : 0)) + totalIn - totalOut;
+
+            if(p && qty > balance) {
+                alert('បរិមាណចេញលើសស្តុកដែលមានក្នុងឃ្លាំង! ស្តុកសល់៖ ' + balance);
+                return;
+            }
+
+            let newEntry = {
+                date: document.getElementById('out-date').value,
+                customer: document.getElementById('out-customer-search').value,
+                code: finalCode,
+                qty: qty,
+                note: document.getElementById('out-note').value.trim(),
+                createdBy: currentUser ? currentUser.username : ''
+            };
+            db.collection("stockOut").add(newEntry).then((docRef) => {
+                alert('បានកត់ត្រាស្តុកចេញដោយជោគជ័យ!');
+                e.target.reset();
+                document.getElementById('out-date').valueAsDate = new Date();
+                document.getElementById('out-unit-label').innerText = '';
+                printSpecificTransaction('stockOut', docRef.id);
+            });
+        }
+
+        function printSpecificTransaction(col, id) {
+            let item = (col === 'stockIn') ? stockIn.find(x => x.id === id) : stockOut.find(x => x.id === id);
+            if(!item) return;
+
+            let p = products.find(x => normalizeCode(x.code) === normalizeCode(item.code));
+            let itemName = p ? p.name : item.code;
+            let unit = p ? p.unit : '';
+
+            document.getElementById('v-title').innerText = (col === 'stockIn') ? 'ប័ណ្ណស្តុកចូល (Stock In Voucher)' : 'ប័ណ្ណស្តុកចេញ (Stock Out Voucher)';
+            document.getElementById('v-no').innerText = 'លេខប័ណ្ណ: VCH-' + item.id.substring(0, 6).toUpperCase();
+            document.getElementById('v-date').innerText = 'កាលបរិច្ឆេទ: ' + formatDate(item.date);
+            document.getElementById('v-type-desc').innerText = (col === 'stockIn') ? 'ស្តុកចូល (Stock In)' : 'ស្តុកចេញ (Stock Out)';
+            document.getElementById('v-party-name').innerText = (col === 'stockIn') ? '-' : (item.customer || '-');
+            document.getElementById('v-user').innerText = currentUser ? currentUser.username : 'Admin';
+
+            let tbody = document.getElementById('v-table-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td class="border p-2.5 font-mono">${item.code}</td>
+                    <td class="border p-2.5">${itemName}</td>
+                    <td class="border p-2.5 text-center font-bold">${item.qty}</td>
+                    <td class="border p-2.5 text-center">${unit}</td>
+                </tr>
+            `;
+
+            document.getElementById('v-note').innerText = item.note || '-';
+            openModal('voucher-modal');
+        }
+
+        function openEditTransactionModal(col, id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let item = (col === 'stockIn') ? stockIn.find(x => x.id === id) : stockOut.find(x => x.id === id);
+            if(!item) return;
+
+            document.getElementById('edit-trans-id').value = item.id;
+            document.getElementById('edit-trans-col').value = col;
+            document.getElementById('edit-trans-date').value = item.date || '';
+            document.getElementById('edit-trans-qty').value = item.qty || 1;
+            document.getElementById('edit-trans-note').value = item.note || '';
+
+            let partyContainer = document.getElementById('edit-trans-party-container');
+            if(col === 'stockOut') {
+                partyContainer.style.display = 'block';
+                document.getElementById('edit-trans-party').value = item.customer || '';
+            } else {
+                partyContainer.style.display = 'none';
+            }
+
+            openModal('edit-transaction-modal');
+        }
+
+        function saveEditTransaction(e) {
+            e.preventDefault();
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិកែប្រែទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            let id = document.getElementById('edit-trans-id').value;
+            let col = document.getElementById('edit-trans-col').value;
+            let date = document.getElementById('edit-trans-date').value;
+            let qty = Number(document.getElementById('edit-trans-qty').value);
+            let note = document.getElementById('edit-trans-note').value.trim();
+
+            let updateData = { date, qty, note };
+            if(col === 'stockOut') {
+                updateData.customer = document.getElementById('edit-trans-party').value.trim();
+            }
+
+            db.collection(col).doc(id).update(updateData).then(() => {
+                closeModal('edit-transaction-modal');
+                alert('បានកែប្រែប្រវត្តិប្រតិបត្តិការស្តុកជោគជ័យ!');
+            });
+        }
+
+        function renderTransactions() {
+            let tbody = document.getElementById('transactions-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let isAdmin = isAdminUser();
+
+            let startDate = document.getElementById('trans-start-date').value;
+            let endDate = document.getElementById('trans-end-date').value;
+            let typeFilter = document.getElementById('filter-trans-type').value;
+            let search = document.getElementById('search-transactions').value.toLowerCase();
+
+            let list = [
+                ...stockIn.map(i => ({ ...i, type: 'ចូល (Stock In)', typeKey: 'in', col: 'stockIn', badge: 'bg-emerald-100 text-emerald-700', targetName: '-' })),
+                ...stockOut.map(i => ({ ...i, type: 'ចេញ (Stock Out)', typeKey: 'out', col: 'stockOut', badge: 'bg-amber-100 text-amber-700', targetName: i.customer || '-' }))
+            ].filter(t => {
+                let dStr = normalizeDateStr(t.date);
+                if (startDate && dStr < startDate) return false;
+                if (endDate && dStr > endDate) return false;
+                if (typeFilter && t.typeKey !== typeFilter) return false;
+
+                if (search) {
+                    let p = products.find(x => normalizeCode(x.code) === normalizeCode(t.code));
+                    let itemName = p ? p.name.toLowerCase() : '';
+                    let code = String(t.code || '').toLowerCase();
+                    let party = t.targetName.toLowerCase();
+                    let note = (t.note || '').toLowerCase();
+                    if (!code.includes(search) && !itemName.includes(search) && !party.includes(search) && !note.includes(search)) {
+                        return false;
+                    }
+                }
+                return true;
+            }).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            list.forEach(t => {
+                let p = products.find(x => normalizeCode(x.code) === normalizeCode(t.code));
+                let itemName = p ? p.name : '';
+                let unitStr = (p && p.unit) ? ` (${p.unit})` : '';
+
+                let printBtn = `<button onclick="printSpecificTransaction('${t.col}', '${t.id}')" class="text-emerald-600 hover:text-emerald-800 text-lg" title="ព្រីនប័ណ្ណ"><i class="fa-solid fa-print"></i></button>`;
+                let adminOnlyBtns = isAdmin ? `
+                    <button onclick="openEditTransactionModal('${t.col}', '${t.id}')" class="text-blue-600 hover:text-blue-800 text-lg" title="កែប្រែ"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteDoc('${t.col}', '${t.id}')" class="text-red-500 hover:text-red-700 text-lg" title="លុប"><i class="fa-solid fa-trash"></i></button>
+                ` : '';
+                let actionBtns = `<div class="flex items-center justify-center gap-3">${printBtn}${adminOnlyBtns}</div>`;
+
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-4">${formatDate(t.date)}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-sm font-semibold ${t.badge}">${t.type}</span></td>
+                        <td class="p-4 text-slate-700 font-medium">${t.targetName}</td>
+                        <td class="p-4 font-mono">${t.code}</td>
+                        <td class="p-4">${itemName || 'N/A'}</td>
+                        <td class="p-4 text-center font-bold">${t.qty}${unitStr}</td>
+                        <td class="p-4 text-slate-600">${t.note || '-'}</td>
+                        <td class="p-4 text-center print-hide-col">${actionBtns}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteDoc(col, id) {
+            if(!isAdminUser()) {
+                alert('អ្នកមិនមានសិទ្ធិលុបទិន្ន័យទេ (Admin Only)!');
+                return;
+            }
+            if(confirm('តើអ្នកពិតជាចង់លុបប្រតិបត្តិការនេះមែនទេ?')) {
+                db.collection(col).doc(id).delete();
+            }
+        }
+
+        function clearReportFilters() {
+            document.getElementById('report-start-date').value = '';
+            document.getElementById('report-end-date').value = '';
+            document.getElementById('filter-report-type').value = '';
+            document.getElementById('search-report').value = '';
+            renderReports();
+        }
+
+        function renderReports() {
+            let thead = document.getElementById('report-table-head');
+            let tbody = document.getElementById('report-table-body');
+            if(!tbody || !thead) return;
+            tbody.innerHTML = '';
+            let grandTotal = 0;
+            let displayIndex = 1;
+
+            let startDate = document.getElementById('report-start-date').value;
+            let endDate = document.getElementById('report-end-date').value;
+            let typeFilter = document.getElementById('filter-report-type').value; // '', 'in', 'out', 'balance'
+            let search = document.getElementById('search-report').value.toLowerCase();
+
+            // Update Date Range Label
+            let rangeLabel = document.getElementById('report-range-label');
+            if (rangeLabel) {
+                if (startDate || endDate) {
+                    rangeLabel.innerText = `(ចន្លោះកាលបរិច្ឆេទ៖ ${startDate ? formatDate(startDate) : 'ដើមគ្រា'} — ${endDate ? formatDate(endDate) : 'បច្ចុប្បន្ន'})`;
+                } else {
+                    rangeLabel.innerText = '(គ្រប់កាលបរិច្ឆេទ)';
+                }
+            }
+
+            // Always keep the exact 10-column format
+            thead.innerHTML = `
+                <tr>
+                    <th class="border p-3.5 bg-slate-100 text-center">ល.រ (No)</th>
+                    <th class="border p-3.5 bg-slate-100">កូដទំនិញ (Code)</th>
+                    <th class="border p-3.5 bg-slate-100">ឈ្មោះទំនិញ (Item Name)</th>
+                    <th class="border p-3.5 bg-slate-100">ប្រភេទ (Category)</th>
+                    <th class="border p-3.5 bg-slate-100">ឯកតា (Unit)</th>
+                    <th class="border p-3.5 bg-slate-100 text-center">ស្តុកដើម (Opening)</th>
+                    <th class="border p-3.5 bg-slate-100 text-center">ចូល (In)</th>
+                    <th class="border p-3.5 bg-slate-100 text-center">ចេញ (Out)</th>
+                    <th class="border p-3.5 bg-slate-100 text-center font-bold">ស្តុកចុងគ្រា (Balance)</th>
+                    <th class="border p-3.5 bg-slate-100 text-right">តម្លៃសរុប ($) (Total Value)</th>
+                </tr>
+            `;
+
+            products.filter(p => {
+                if (search) {
+                    let name = (p.name || '').toLowerCase();
+                    let code = (p.code || '').toLowerCase();
+                    let cat = (p.category || '').toLowerCase();
+                    if (!name.includes(search) && !code.includes(search) && !cat.includes(search)) {
+                        return false;
+                    }
+                }
+                return true;
+            }).forEach((p) => {
+                let pCodeNorm = normalizeCode(p.code);
+                let opening = Number(p.opening) || 0;
+
+                // Filter movements within selected date range [startDate, endDate]
+                let filteredIn = stockIn.filter(i => {
+                    if (normalizeCode(i.code) !== pCodeNorm) return false;
+                    let dStr = normalizeDateStr(i.date);
+                    if (startDate && dStr < startDate) return false;
+                    if (endDate && dStr > endDate) return false;
+                    return true;
+                });
+
+                let filteredOut = stockOut.filter(o => {
+                    if (normalizeCode(o.code) !== pCodeNorm) return false;
+                    let dStr = normalizeDateStr(o.date);
+                    if (startDate && dStr < startDate) return false;
+                    if (endDate && dStr > endDate) return false;
+                    return true;
+                });
+
+                let totalIn = filteredIn.reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
+                let totalOut = filteredOut.reduce((sum, o) => sum + (Number(o.qty) || 0), 0);
+                let balance = opening + totalIn - totalOut;
+
+                // Show only relevant items depending on selected type & date range
+                if (typeFilter === 'in' && totalIn === 0) return;
+                if (typeFilter === 'out' && totalOut === 0) return;
+                if (typeFilter === 'balance') {
+                    if (startDate || endDate) {
+                        if (totalIn === 0 && totalOut === 0) return;
+                    } else if (balance === 0 && totalIn === 0 && totalOut === 0) {
+                        return;
+                    }
+                }
+
+                let unitPrice = Number(p.price) || 0;
+                let totalValue = balance * unitPrice;
+                grandTotal += totalValue;
+
+                let balanceClass = balance < 0 ? 'text-red-600 font-bold' : 'font-bold text-slate-800';
+
+                tbody.innerHTML += `
+                    <tr class="border hover:bg-slate-50">
+                        <td class="border p-3.5 text-center">${displayIndex++}</td>
+                        <td class="border p-3.5 font-mono text-blue-600 font-medium">${p.code}</td>
+                        <td class="border p-3.5 font-medium">${p.name}</td>
+                        <td class="border p-3.5 text-slate-600">${p.category}</td>
+                        <td class="border p-3.5 font-medium text-slate-700">${p.unit || '-'}</td>
+                        <td class="border p-3.5 text-center">${opening}</td>
+                        <td class="border p-3.5 text-center text-emerald-600 font-medium">+${totalIn}</td>
+                        <td class="border p-3.5 text-center text-amber-600 font-medium">-${totalOut}</td>
+                        <td class="border p-3.5 text-center ${balanceClass}">${balance}</td>
+                        <td class="border p-3.5 text-right font-medium">$${totalValue.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('report-grand-total').innerText = '$' + grandTotal.toFixed(2);
+            document.getElementById('report-date').innerText = new Date().toLocaleDateString();
+        }
+
+        function renderUsers() {
+            let tbody = document.getElementById('users-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let isAdmin = isAdminUser();
+            users.forEach((u) => {
+                let statusBadge = u.status === 'disabled' 
+                    ? '<span class="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700">បិទសិទ្ធិ (Disabled)</span>'
+                    : '<span class="px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700">សកម្ម (Active)</span>';
+
+                let actionBtns = '<span class="text-sm text-slate-400">គ្មានសិទ្ធិ</span>';
+                if(isAdmin) {
+                    actionBtns = `
+                        <button onclick="sendUserResetPassword('${u.id}')" class="text-amber-600 hover:text-amber-800 mr-3 text-lg" title="Reset Password"><i class="fa-solid fa-key"></i></button>
+                        <button onclick="openEditUserModal('${u.id}')" class="text-blue-600 hover:text-blue-800 mr-3 text-lg" title="កែប្រែ / បិទសិទ្ធិ"><i class="fa-solid fa-pen-to-square"></i></button>
+                    `;
+                    let uname = u.username || u.email || '';
+                    if(uname !== 'admin' && uname !== 'admin@bellevillage.com' && uname !== 'ravy.phan@gmail.com') {
+                        actionBtns += `<button onclick="deleteDoc('users', '${u.id}')" class="text-red-500 hover:text-red-700 text-lg" title="លុប"><i class="fa-solid fa-trash"></i></button>`;
+                    } else {
+                        actionBtns += '<span class="text-slate-400 text-sm ml-2">Protected</span>';
+                    }
+                }
+
+                let displayName = u.email && !u.email.endsWith('@siob-inventory.local') ? `${u.username || ''} (${u.email})` : (u.username || u.email);
+
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-4 font-medium text-slate-800">${displayName}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">${u.role}</span></td>
+                        <td class="p-4">${statusBadge}</td>
+                        <td class="p-4 text-center print-hide-col">${actionBtns}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function populateDropdowns() {
+            let inList = document.getElementById('in-item-list');
+            if(inList) {
+                inList.innerHTML = '';
+                products.forEach(p => {
+                    let unitText = p.unit ? ` [${p.unit}]` : '';
+                    inList.innerHTML += `<option value="${p.code} - ${p.name}${unitText}">`;
+                });
+            }
+
+            let outList = document.getElementById('out-item-list');
+            if(outList) {
+                outList.innerHTML = '';
+                products.forEach(p => {
+                    let unitText = p.unit ? ` [${p.unit}]` : '';
+                    outList.innerHTML += `<option value="${p.code} - ${p.name}${unitText}">`;
+                });
+            }
+
+            let custSearchList = document.getElementById('out-customer-list');
+            if(custSearchList) {
+                custSearchList.innerHTML = '';
+                customers.forEach(c => {
+                    custSearchList.innerHTML += `<option value="${c.name}">`;
+                });
+            }
+        }
+
+        function populateSupplierDropdowns() {
+            ['new-supplier', 'edit-supplier'].forEach(id => {
+                let select = document.getElementById(id);
+                if(!select) return;
+                select.innerHTML = '<option value="">-- ជ្រើសរើសអ្នកផ្គត់ផ្គង់ --</option>';
+                suppliers.forEach(s => {
+                    select.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                });
+            });
+        }
+
+        function exportProductsExcel() {
+            let csv = 'Code,Name,Category,Supplier,Unit,Opening,Price\n';
+            products.forEach(p => {
+                csv += `"${p.code}","${p.name}","${p.category}","${p.supplier || ''}","${p.unit || ''}",${p.opening || 0},${p.price || 0}\n`;
+            });
+            downloadCSV(csv, 'Inventory_Products.csv');
+        }
+
+        function importProductsExcel(e) {
+            let file = e.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                let lines = evt.target.result.split('\n');
+                for(let i = 1; i < lines.length; i++) {
+                    if(!lines[i].trim()) continue;
+                    let cols = parseCSVRow(lines[i]);
+                    if(cols.length >= 7) {
+                        let code = cols[0];
+                        if(!products.some(p => normalizeCode(p.code) === normalizeCode(code))) {
+                            db.collection("products").add({
+                                code: code,
+                                name: cols[1],
+                                category: cols[2],
+                                supplier: cols[3],
+                                unit: cols[4],
+                                opening: Number(cols[5]) || 0,
+                                price: Number(cols[6]) || 0,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    }
+                }
+                alert('Import ទំនិញជោគជ័យ!');
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function exportCustomersExcel() {
+            let csv = 'Name,Company,Phone,Email,Address\n';
+            customers.forEach(c => {
+                csv += `"${c.name}","${c.company || ''}","${c.phone || ''}","${c.email || ''}","${c.address || ''}"\n`;
+            });
+            downloadCSV(csv, 'Customers.csv');
+        }
+
+        function importCustomersExcel(e) {
+            let file = e.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                let lines = evt.target.result.split('\n');
+                for(let i = 1; i < lines.length; i++) {
+                    if(!lines[i].trim()) continue;
+                    let cols = parseCSVRow(lines[i]);
+                    if(cols.length >= 5) {
+                        let name = cols[0];
+                        if(!customers.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                            db.collection("customers").add({
+                                name: name, company: cols[1], phone: cols[2], email: cols[3], address: cols[4],
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    }
+                }
+                alert('Import អតិថិជនជោគជ័យ!');
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function exportSuppliersExcel() {
+            let csv = 'Name,Company,Phone,Email,Address\n';
+            suppliers.forEach(s => {
+                csv += `"${s.name}","${s.company || ''}","${s.phone || ''}","${s.email || ''}","${s.address || ''}"\n`;
+            });
+            downloadCSV(csv, 'Suppliers.csv');
+        }
+
+        function importSuppliersExcel(e) {
+            let file = e.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                let lines = evt.target.result.split('\n');
+                for(let i = 1; i < lines.length; i++) {
+                    if(!lines[i].trim()) continue;
+                    let cols = parseCSVRow(lines[i]);
+                    if(cols.length >= 5) {
+                        let name = cols[0];
+                        if(!suppliers.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+                            db.collection("suppliers").add({
+                                name: name, company: cols[1], phone: cols[2], email: cols[3], address: cols[4],
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    }
+                }
+                alert('Import អ្នកផ្គត់ផ្គង់ជោគជ័យ!');
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function exportTransactionsToCSV() {
+            let csv = 'Date,Type,Party,Code,Quantity,Note\n';
+            stockIn.forEach(i => csv += `"${i.date}","Stock In","-","${i.code}",${i.qty},"${i.note || ''}"\n`);
+            stockOut.forEach(o => csv += `"${o.date}","Stock Out","${o.customer || ''}","${o.code}",${o.qty},"${o.note || ''}"\n`);
+            downloadCSV(csv, 'Transactions.csv');
+        }
+
+        function importTransactionsExcel(e) {
+            let file = e.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                let lines = evt.target.result.split('\n');
+                for(let i = 1; i < lines.length; i++) {
+                    if(!lines[i].trim()) continue;
+                    let cols = parseCSVRow(lines[i]);
+                    if(cols.length >= 6) {
+                        let date = cols[0];
+                        let type = cols[1].toLowerCase();
+                        let party = cols[2];
+                        let code = cols[3];
+                        let qty = Number(cols[4]) || 0;
+                        let note = cols[5];
+
+                        if(type.includes('in') || type.includes('ចូល')) {
+                            db.collection("stockIn").add({ date, code, qty, note });
+                        } else {
+                            db.collection("stockOut").add({ date, customer: party, code, qty, note });
+                        }
+                    }
+                }
+                alert('Import ប្រវត្តិប្រតិបត្តិការស្តុកជោគជ័យ!');
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function importReportsExcel(e) { importProductsExcel(e); }
+        function exportToCSV() { exportTransactionsToCSV(); }
+
+        function downloadCSV(csv, filename) {
+            let blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function updatePrintDates() {
+            let todayStr = new Date().toLocaleDateString();
+            document.querySelectorAll('.print-today').forEach(el => {
+                el.innerText = todayStr;
+            });
+        }
+
+        function printSection(sectionName) {
+            updatePrintDates();
+            document.body.classList.remove('printing-voucher');
+            document.getElementById('voucher-modal').classList.remove('show-voucher-print');
+            window.print();
+        }
+
+        function printVoucher() {
+            updatePrintDates();
+            document.body.classList.add('printing-voucher');
+            document.getElementById('voucher-modal').classList.add('show-voucher-print');
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('printing-voucher');
+                document.getElementById('voucher-modal').classList.remove('show-voucher-print');
+            }, 500);
+        }
+
+        function openAddProductModal() { populateSupplierDropdowns(); openModal('product-modal'); }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        checkAuth();
+    </script>
+</body>
+</html>
